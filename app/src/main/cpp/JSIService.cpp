@@ -8,11 +8,28 @@
 
 #include <android/log.h>
 
+#include <hermes/hermes.h>
+#include <jsi/jsi.h>
+
 #define LOG_TAG "remotejsi-nativejsiservice"
 
 #define LOGD(fmt, ...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##__VA_ARGS__)
 
 #define LOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##__VA_ARGS__)
+
+class JSI_EXPORT StringBuffer : public facebook::jsi::Buffer {
+public:
+    StringBuffer(std::string s) : s_(std::move(s)) {}
+    size_t size() const override {
+        return s_.size();
+    }
+    const uint8_t* data() const override {
+        return reinterpret_cast<const uint8_t*>(s_.data());
+    }
+
+private:
+    std::string s_;
+};
 
 namespace aidl {
     namespace com {
@@ -26,12 +43,24 @@ namespace aidl {
                    return ::ndk::ScopedAStatus::ok();
                 }
 
-                ::ndk::ScopedAStatus JSIService::handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface) {
+                ::ndk::ScopedAStatus JSIService::handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface, std::string* _aidl_return) {
                     // std::shared_ptr<IRemoteJSIInterface> g_spRemoteJSIInterface;
                     LOGD("[JSIService] [cpp] handshake");
                     g_spRemoteJSIInterface = IRemoteJSIInterface::fromBinder(in_remoteJSIInterface);
                     LOGD("[JSIService] [cpp] handshake -- received remote interface");
                     g_spRemoteJSIInterface->handshakeAck();
+
+                    auto script = std::make_shared<StringBuffer>("\"abcd\"");
+                    std::string sourceUrl = "MyScript";
+                    std::unique_ptr<facebook::hermes::HermesRuntime> runtime = facebook::hermes::makeHermesRuntime();
+                    facebook::jsi::Value result = runtime->evaluateJavaScript(script, sourceUrl);
+                    if(result.isString()) {
+                        facebook::jsi::String stringRes = result.getString(*runtime);
+                        *_aidl_return = stringRes.utf8(*runtime);
+                    } else {
+                        *_aidl_return = std::string("non-string return value from script evaluation");
+                    }
+
                     return ::ndk::ScopedAStatus::ok();
                 }
 

@@ -28,7 +28,7 @@ namespace aidl {
 
                     // ::ndk::ScopedAStatus get(::ndk::SpAIBinder* _aidl_return) override;
                     ::ndk::ScopedAStatus
-                    handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface) override;
+                    handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface, std::string* _aidl_return) override;
                 };
             }
         }

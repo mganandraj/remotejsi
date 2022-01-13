@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     // Used to load the 'remotejsi' library on application startup.
     static {
         System.loadLibrary("remotejsi");
+        System.loadLibrary("hermes");
     }
 
     private IJSIInterface mService = null;

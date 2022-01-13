@@ -11,6 +11,7 @@ public class JSIService extends Service {
     static
     {
         System.loadLibrary("remotejsi");
+        System.loadLibrary("hermes");
     }
 
     private IBinder mBinder;

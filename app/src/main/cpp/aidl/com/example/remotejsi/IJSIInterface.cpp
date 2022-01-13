@@ -49,15 +49,19 @@ static binder_status_t _aidl_onTransact(AIBinder* _aidl_binder, transaction_code
     }
     case (FIRST_CALL_TRANSACTION + 1 /*handshake*/): {
       ::ndk::SpAIBinder in_remoteJSIInterface;
+      std::string _aidl_return;
 
       _aidl_ret_status = ::ndk::AParcel_readRequiredStrongBinder(_aidl_in, &in_remoteJSIInterface);
       if (_aidl_ret_status != STATUS_OK) break;
 
-      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->handshake(in_remoteJSIInterface);
+      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->handshake(in_remoteJSIInterface, &_aidl_return);
       _aidl_ret_status = AParcel_writeStatusHeader(_aidl_out, _aidl_status.get());
       if (_aidl_ret_status != STATUS_OK) break;
 
       if (!AStatus_isOk(_aidl_status.get())) break;
+
+      _aidl_ret_status = ::ndk::AParcel_writeString(_aidl_out, _aidl_return);
+      if (_aidl_ret_status != STATUS_OK) break;
 
       break;
     }
@@ -121,7 +125,7 @@ BpJSIInterface::~BpJSIInterface() {}
   _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
   return _aidl_status;
 }
-::ndk::ScopedAStatus BpJSIInterface::handshake(const ::ndk::SpAIBinder& in_remoteJSIInterface) {
+::ndk::ScopedAStatus BpJSIInterface::handshake(const ::ndk::SpAIBinder& in_remoteJSIInterface, std::string* _aidl_return) {
   binder_status_t _aidl_ret_status = STATUS_OK;
   ::ndk::ScopedAStatus _aidl_status;
   ::ndk::ScopedAParcel _aidl_in;
@@ -144,7 +148,7 @@ BpJSIInterface::~BpJSIInterface() {}
     #endif  // BINDER_STABILITY_SUPPORT
     );
   if (_aidl_ret_status == STATUS_UNKNOWN_TRANSACTION && IJSIInterface::getDefaultImpl()) {
-    return IJSIInterface::getDefaultImpl()->handshake(in_remoteJSIInterface);
+    return IJSIInterface::getDefaultImpl()->handshake(in_remoteJSIInterface, _aidl_return);
   }
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
@@ -152,6 +156,9 @@ BpJSIInterface::~BpJSIInterface() {}
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
   if (!AStatus_isOk(_aidl_status.get())) return _aidl_status;
+
+  _aidl_ret_status = ::ndk::AParcel_readString(_aidl_out.get(), _aidl_return);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
   _aidl_error:
   _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
@@ -212,7 +219,7 @@ std::shared_ptr<IJSIInterface> IJSIInterface::default_impl = nullptr;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
   return _aidl_status;
 }
-::ndk::ScopedAStatus IJSIInterfaceDefault::handshake(const ::ndk::SpAIBinder& /*in_remoteJSIInterface*/) {
+::ndk::ScopedAStatus IJSIInterfaceDefault::handshake(const ::ndk::SpAIBinder& /*in_remoteJSIInterface*/, std::string* /*_aidl_return*/) {
   ::ndk::ScopedAStatus _aidl_status;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
   return _aidl_status;

@@ -30,6 +30,7 @@ target_include_directories (
         PRIVATE
         E:/gh-droid/remotejsi/app/src/main/cpp/includes
         includes
+        E:/gh-droid/remotejsi/node_modules/hermes-engine/android/include
 )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -54,9 +55,24 @@ find_library (
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
+add_library( hermes
+        SHARED
+        IMPORTED )
+
+set_target_properties( # Specifies the target library.
+        hermes
+
+        # Specifies the parameter you want to define.
+        PROPERTIES IMPORTED_LOCATION
+
+        # Provides the path to the library you want to import.
+        E:/gh-droid/remotejsi/app/build/hermes/jni/${ANDROID_ABI}/libhermes.so )
+
+
+
 target_link_libraries( # Specifies the target library.
         remotejsi
-
+        hermes
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib}

@@ -96,7 +96,9 @@ Java_com_example_remotejsi_MainActivity_talkToService(
     }
 
     static RemoteJSIService remoteJSIService;
-    g_spMyService->handshake(remoteJSIService.asBinder());
+    std::string result;
+    g_spMyService->handshake(remoteJSIService.asBinder(), &result);
+    LOGE("[App] [cpp] Handshake result: %s", result.c_str());
 
     // ::ndk::SpAIBinder jsiBinder;
     // g_spMyService->get(&jsiBinder);

@@ -9,9 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RemoteJSI">
+
+        <!--android:process=":externalProcess"-->
         <service
             android:name=".JSIService"
-            android:process=":externalProcess"
             android:enabled="true"
             android:exported="true"></service>
 
