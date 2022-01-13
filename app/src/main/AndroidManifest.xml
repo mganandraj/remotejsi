@@ -11,6 +11,7 @@
         android:theme="@style/Theme.RemoteJSI">
         <service
             android:name=".JSIService"
+            android:process=":externalProcess"
             android:enabled="true"
             android:exported="true"></service>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aidl/com/example/remotejsi/IJSIAidlInterface.h"
+#include "aidl/com/example/remotejsi/IRemoteJSIInterface.h"
 
 #include <android/binder_ibinder.h>
 
@@ -8,10 +8,10 @@ namespace aidl {
 namespace com {
 namespace example {
 namespace remotejsi {
-class BnJSIAidlInterface : public ::ndk::BnCInterface<IJSIAidlInterface> {
+class BnRemoteJSIInterface : public ::ndk::BnCInterface<IRemoteJSIInterface> {
 public:
-  BnJSIAidlInterface();
-  virtual ~BnJSIAidlInterface();
+  BnRemoteJSIInterface();
+  virtual ~BnRemoteJSIInterface();
 protected:
   ::ndk::SpAIBinder createBinder() override;
 private:

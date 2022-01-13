@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         System.loadLibrary("remotejsi");
     }
 
-    private IJSIAidlInterface mService = null;
+    private IJSIInterface mService = null;
     private volatile boolean mIsServiceConnected = false;
     private final ConditionVariable mServiceConnectionWaitLock = new ConditionVariable();
 

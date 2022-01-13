@@ -21,7 +21,9 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        native-lib.cpp JSIService.cpp E:/gh-droid/remotejsi/app/src/main/cpp/aidl/com/example/remotejsi/IJSIAidlInterface.cpp)
+        native-lib.cpp JSIService.cpp RemoteJSIService.cpp
+        E:/gh-droid/remotejsi/app/src/main/cpp/aidl/com/example/remotejsi/IJSIInterface.cpp
+        E:/gh-droid/remotejsi/app/src/main/cpp/aidl/com/example/remotejsi/IRemoteJSIInterface.cpp)
 
 target_include_directories (
         remotejsi

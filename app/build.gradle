@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.remotejsi"
-        minSdk 30 /* Binder native headers not available below */
+        minSdk 29 /* Binder native headers not available below */
         targetSdk 31
         versionCode 1
         versionName "1.0"
@@ -59,7 +59,11 @@ task compileAidlNdk() {
 
         def aidlFile = [projectDir.absolutePath,
                         'src', 'main', 'aidl',
-                        'com', 'example', 'remotejsi', 'IJSIAidlInterface.aidl'].join(File.separator)
+                        'com', 'example', 'remotejsi', 'IJSIInterface.aidl'].join(File.separator)
+
+        def aidlFile2 = [projectDir.absolutePath,
+                        'src', 'main', 'aidl',
+                        'com', 'example', 'remotejsi', 'IRemoteJSIInterface.aidl'].join(File.separator)
 
         exec {
             executable(aidlCpp)
@@ -68,6 +72,15 @@ task compileAidlNdk() {
                     '-h', headerOutDir,
                     '-I', searchPathForImports,
                     aidlFile)
+        }
+
+        exec {
+            executable(aidlCpp)
+            args('--lang=ndk',
+                    '-o', outDir,
+                    '-h', headerOutDir,
+                    '-I', searchPathForImports,
+                    aidlFile2)
         }
     }
 }

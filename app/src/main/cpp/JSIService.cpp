@@ -4,10 +4,11 @@
 
 #include <android/binder_ibinder_jni.h>
 #include "JSIService.h"
+#include "RemoteJSIService.h"
 
 #include <android/log.h>
 
-#define LOG_TAG "remotejsi-service"
+#define LOG_TAG "remotejsi-nativejsiservice"
 
 #define LOGD(fmt, ...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##__VA_ARGS__)
 
@@ -24,6 +25,21 @@ namespace aidl {
 
                    return ::ndk::ScopedAStatus::ok();
                 }
+
+                ::ndk::ScopedAStatus JSIService::handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface) {
+                    // std::shared_ptr<IRemoteJSIInterface> g_spRemoteJSIInterface;
+                    LOGD("[JSIService] [cpp] handshake");
+                    g_spRemoteJSIInterface = IRemoteJSIInterface::fromBinder(in_remoteJSIInterface);
+                    LOGD("[JSIService] [cpp] handshake -- received remote interface");
+                    g_spRemoteJSIInterface->handshakeAck();
+                    return ::ndk::ScopedAStatus::ok();
+                }
+
+                /*::ndk::ScopedAStatus get(::ndk::SpAIBinder* _aidl_return) {
+                    static RemoteJSIService myService;
+                    // ::ndk::SpAIBinder authzBinder(myService.asBinder());
+                    *_aidl_return = myService.asBinder();
+                }*/
             }
         }
     }

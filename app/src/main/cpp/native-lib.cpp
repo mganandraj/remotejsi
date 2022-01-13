@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "JSIService.h"
+#include "RemoteJSIService.h"
 
 #include <android/binder_ibinder_jni.h>
 
@@ -29,8 +30,8 @@ using namespace std;
 
 // using namespace android;
 
-#include <aidl/com/example/remotejsi/BpJSIAidlInterface.h>
-std::shared_ptr<IJSIAidlInterface> g_spMyService;
+#include <aidl/com/example/remotejsi/BpJSIInterface.h>
+std::shared_ptr<IJSIInterface> g_spMyService;
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_remotejsi_MainActivity_stringFromJNI(
@@ -62,7 +63,7 @@ Java_com_example_remotejsi_MainActivity_onServiceConnected(
     AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
 
     const ::ndk::SpAIBinder spBinder(pBinder);
-    g_spMyService = IJSIAidlInterface::fromBinder(spBinder);
+    g_spMyService = IJSIInterface::fromBinder(spBinder);
 
     LOGD("[App] [cpp] onServiceConnected");
 }
@@ -93,6 +94,14 @@ Java_com_example_remotejsi_MainActivity_talkToService(
     {
         LOGE("[App] [cpp] IMyService.basicTypes - Failed");
     }
+
+    static RemoteJSIService remoteJSIService;
+    g_spMyService->handshake(remoteJSIService.asBinder());
+
+    // ::ndk::SpAIBinder jsiBinder;
+    // g_spMyService->get(&jsiBinder);
+    // std::shared_ptr<IRemoteJSIInterface> remoteJSIInterface = IRemoteJSIInterface::fromBinder(jsiBinder);
+    // remoteJSIInterface->
 
   /*  ComplexType ct(2021, 65535000, true, 3.14f,3.141592653589793238,
                    "Hello, World!");
