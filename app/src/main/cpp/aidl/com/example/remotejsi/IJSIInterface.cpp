@@ -47,14 +47,14 @@ static binder_status_t _aidl_onTransact(AIBinder* _aidl_binder, transaction_code
 
       break;
     }
-    case (FIRST_CALL_TRANSACTION + 1 /*handshake*/): {
-      ::ndk::SpAIBinder in_remoteJSIInterface;
+    case (FIRST_CALL_TRANSACTION + 1 /*eval*/): {
+      std::string in_aString;
       std::string _aidl_return;
 
-      _aidl_ret_status = ::ndk::AParcel_readRequiredStrongBinder(_aidl_in, &in_remoteJSIInterface);
+      _aidl_ret_status = ::ndk::AParcel_readString(_aidl_in, &in_aString);
       if (_aidl_ret_status != STATUS_OK) break;
 
-      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->handshake(in_remoteJSIInterface, &_aidl_return);
+      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->eval(in_aString, &_aidl_return);
       _aidl_ret_status = AParcel_writeStatusHeader(_aidl_out, _aidl_status.get());
       if (_aidl_ret_status != STATUS_OK) break;
 
@@ -125,7 +125,7 @@ BpJSIInterface::~BpJSIInterface() {}
   _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
   return _aidl_status;
 }
-::ndk::ScopedAStatus BpJSIInterface::handshake(const ::ndk::SpAIBinder& in_remoteJSIInterface, std::string* _aidl_return) {
+::ndk::ScopedAStatus BpJSIInterface::eval(const std::string& in_aString, std::string* _aidl_return) {
   binder_status_t _aidl_ret_status = STATUS_OK;
   ::ndk::ScopedAStatus _aidl_status;
   ::ndk::ScopedAParcel _aidl_in;
@@ -134,12 +134,12 @@ BpJSIInterface::~BpJSIInterface() {}
   _aidl_ret_status = AIBinder_prepareTransaction(asBinder().get(), _aidl_in.getR());
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
-  _aidl_ret_status = ::ndk::AParcel_writeRequiredStrongBinder(_aidl_in.get(), in_remoteJSIInterface);
+  _aidl_ret_status = ::ndk::AParcel_writeString(_aidl_in.get(), in_aString);
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
   _aidl_ret_status = AIBinder_transact(
     asBinder().get(),
-    (FIRST_CALL_TRANSACTION + 1 /*handshake*/),
+    (FIRST_CALL_TRANSACTION + 1 /*eval*/),
     _aidl_in.getR(),
     _aidl_out.getR(),
     0
@@ -148,7 +148,7 @@ BpJSIInterface::~BpJSIInterface() {}
     #endif  // BINDER_STABILITY_SUPPORT
     );
   if (_aidl_ret_status == STATUS_UNKNOWN_TRANSACTION && IJSIInterface::getDefaultImpl()) {
-    return IJSIInterface::getDefaultImpl()->handshake(in_remoteJSIInterface, _aidl_return);
+    return IJSIInterface::getDefaultImpl()->eval(in_aString, _aidl_return);
   }
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
@@ -219,7 +219,7 @@ std::shared_ptr<IJSIInterface> IJSIInterface::default_impl = nullptr;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
   return _aidl_status;
 }
-::ndk::ScopedAStatus IJSIInterfaceDefault::handshake(const ::ndk::SpAIBinder& /*in_remoteJSIInterface*/, std::string* /*_aidl_return*/) {
+::ndk::ScopedAStatus IJSIInterfaceDefault::eval(const std::string& /*in_aString*/, std::string* /*_aidl_return*/) {
   ::ndk::ScopedAStatus _aidl_status;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
   return _aidl_status;

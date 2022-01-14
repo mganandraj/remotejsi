@@ -12,7 +12,7 @@
 
         <!--android:process=":externalProcess"-->
         <service
-            android:name=".JSIService"
+            android:name=".JSIImplService"
             android:enabled="true"
             android:exported="true"></service>
 

@@ -5,20 +5,19 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-public class JSIService extends Service {
+public class JSIImplService extends Service {
 
-    // Used to load the 'native-lib' library on application startup.
     static
     {
-        System.loadLibrary("remotejsi");
         System.loadLibrary("hermes");
+        System.loadLibrary("jsiimpl");
     }
 
     private IBinder mBinder;
 
     private static final String LOG_TAG = "remotejsi-JSIService";
 
-    public JSIService() {
+    public JSIImplService() {
     }
 
     @Override

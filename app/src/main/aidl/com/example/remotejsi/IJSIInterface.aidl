@@ -13,5 +13,6 @@ interface IJSIInterface {
 
     // IBinder get();
 
-    String handshake(IBinder remoteJSIInterface);
+    // String handshake(IBinder remoteJSIInterface);
+    String eval(String aString);
 }

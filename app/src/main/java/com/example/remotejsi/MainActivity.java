@@ -9,23 +9,15 @@ import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.remotejsi.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection {
+public class MainActivity extends AppCompatActivity implements JSIProxy.JSIProxyListener {
 
     private static final String LOG_TAG = "remotejsi-MainActivity";
-
-    // Used to load the 'remotejsi' library on application startup.
-    static {
-        System.loadLibrary("remotejsi");
-        System.loadLibrary("hermes");
-    }
-
-    private IJSIInterface mService = null;
-    private volatile boolean mIsServiceConnected = false;
-    private final ConditionVariable mServiceConnectionWaitLock = new ConditionVariable();
 
 
     private ActivityMainBinding binding;
@@ -38,21 +30,36 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         setContentView(binding.getRoot());
 
         // Example of a call to a native method
-        TextView tv = binding.sampleText;
-        tv.setText(stringFromJNI());
+        // TextView tv = binding.sampleText;
+        // tv.setText(stringFromJNI());
+
+        JSIProxy.INSTNACE.setListener(this);
+
+        Button startServiceButton = binding.startServiceButton;
+        startServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setClassName("com.example.remotejsi",
+                        "com.example.remotejsi.JSIImplService");
+                Log.d(LOG_TAG, "[App] [java] bindService");
+                bindService(intent, JSIProxy.INSTNACE, BIND_AUTO_CREATE);
+            }
+        });
+
+        Button startRuntimeButton = binding.startRuntimeButton;
+        startRuntimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSIProxy.INSTNACE.startRuntime();
+            }
+        });
     }
 
-    @Override
+    /*@Override
     protected void onResume() {
         super.onResume();
 
-        Intent intent = new Intent();
-        intent.setClassName("com.example.remotejsi",
-                "com.example.remotejsi.JSIService");
-
-        Log.d(LOG_TAG, "[App] [java] bindService");
-
-        bindService(intent, this, BIND_AUTO_CREATE);
 
         new Thread(new Runnable()
         {
@@ -61,58 +68,22 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             {
                 runOnUiThread(new SetTextRunnable("Waiting to talk to IMyService..."));
 
-                // Not connected to service yet?
-                while(!mIsServiceConnected)
-                {
-                    mServiceConnectionWaitLock.block(); // waits for service connection
-                }
+
 
                 String returnedString = talkToService();
 
                 runOnUiThread(new SetTextRunnable("Talked to IMyService. Returned : " + returnedString));
             }
         }).start();
-    }
-
-    /**
-     * A native method that is implemented by the 'remotejsi' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
+    }*/
 
     @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        Log.d(LOG_TAG, "[App] [java] onServiceConnected");
-        onServiceConnected(iBinder);
-        mIsServiceConnected = true;
-        mServiceConnectionWaitLock.open(); // breaks service connection waits
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-        mIsServiceConnected = false;
-        onServiceDisconnected();
-        Log.d(LOG_TAG, "[App] [java] onServiceDisconnected");
-    }
-
-    public native void onServiceConnected(IBinder binder);
-    public native void onServiceDisconnected();
-    public native String talkToService();
-
-    private class SetTextRunnable implements Runnable
-    {
-        final String mText;
-
-        SetTextRunnable(String text)
-        {
-            mText = text;
-        }
-
-        @Override
-        public void run()
-        {
-            // mTV.setText(mText);
-            Log.d(LOG_TAG, "[SetTextRunnable] :: " + mText);
-        }
+    public void onServiceStatusChanged(String status) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                binding.serviceStatusTextview.setText(status);
+            }
+        });
     }
 }

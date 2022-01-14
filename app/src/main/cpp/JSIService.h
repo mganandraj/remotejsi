@@ -10,29 +10,26 @@
 
 #include <aidl/com/example/remotejsi/BpRemoteJSIInterface.h>
 
+namespace aidl::com::example::remotejsi {
+class JSIService : public BnJSIInterface {
+public:
 
-namespace aidl {
-    namespace com {
-        namespace example {
-            namespace remotejsi {
-                class JSIService : public BnJSIInterface {
-                public:
-
-                    std::shared_ptr<IRemoteJSIInterface> g_spRemoteJSIInterface;
+    std::shared_ptr<IRemoteJSIInterface> g_spRemoteJSIInterface;
 
 
-                    ::ndk::ScopedAStatus
-                    basicTypes(int32_t in_anInt, int64_t in_aLong, bool in_aBoolean,
-                               float in_aFloat, double in_aDouble,
-                               const std::string &in_aString) override;
+    ::ndk::ScopedAStatus
+    basicTypes(int32_t in_anInt, int64_t in_aLong, bool in_aBoolean,
+               float in_aFloat, double in_aDouble,
+               const std::string &in_aString) override;
 
-                    // ::ndk::ScopedAStatus get(::ndk::SpAIBinder* _aidl_return) override;
-                    ::ndk::ScopedAStatus
-                    handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface, std::string* _aidl_return) override;
-                };
-            }
-        }
-    }
+    // ::ndk::ScopedAStatus get(::ndk::SpAIBinder* _aidl_return) override;
+    // ::ndk::ScopedAStatus
+    // handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface, std::string* _aidl_return) override;
+
+    ::ndk::ScopedAStatus eval(const std::string& in_aString, std::string* _aidl_return) override;
+
+    // std::unique_ptr<facebook::hermes::HermesRuntime> m_runtime;
+};
 }
 
 #endif //REMOTEJSI_JSISERVICE_H

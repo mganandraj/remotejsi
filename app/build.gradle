@@ -18,6 +18,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags '-std=c++17'
+                arguments "-Dproject_dir=${projectDir.absolutePath.replace("\\","/")}"
             }
         }
     }
@@ -99,6 +100,11 @@ task compileAidlNdk() {
                         'src', 'main', 'aidl',
                         'com', 'example', 'remotejsi', 'IRemoteJSIInterface.aidl'].join(File.separator)
 
+        def aidlFile3 = [projectDir.absolutePath,
+                         'src', 'main', 'aidl',
+                         'com', 'example', 'remotejsi', 'IManagerInterface.aidl'].join(File.separator)
+
+
         exec {
             executable(aidlCpp)
             args('--lang=ndk',
@@ -116,11 +122,22 @@ task compileAidlNdk() {
                     '-I', searchPathForImports,
                     aidlFile2)
         }
+
+        exec {
+            executable(aidlCpp)
+            args('--lang=ndk',
+                    '-o', outDir,
+                    '-h', headerOutDir,
+                    '-I', searchPathForImports,
+                    aidlFile3)
+        }
+
+
     }
 }
 
 afterEvaluate {
-    preBuild.dependsOn(compileAidlNdk)
+    preBuild.dependsOn(compileAidlNdk, prepareHermes)
 }
 
 

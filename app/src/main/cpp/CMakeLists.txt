@@ -9,71 +9,74 @@ cmake_minimum_required(VERSION 3.10.2)
 
 project("remotejsi")
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
-
-add_library( # Sets the name of the library.
-        remotejsi
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-        native-lib.cpp JSIService.cpp RemoteJSIService.cpp
-        E:/gh-droid/remotejsi/app/src/main/cpp/aidl/com/example/remotejsi/IJSIInterface.cpp
-        E:/gh-droid/remotejsi/app/src/main/cpp/aidl/com/example/remotejsi/IRemoteJSIInterface.cpp)
-
-target_include_directories (
-        remotejsi
-        PRIVATE
-        E:/gh-droid/remotejsi/app/src/main/cpp/includes
-        includes
-        E:/gh-droid/remotejsi/node_modules/hermes-engine/android/include
+find_library(log-lib
+        log
 )
 
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because CMake includes system libraries in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
-
-find_library( # Sets the name of the path variable.
-        log-lib
-
-        # Specifies the name of the NDK library that
-        # you want CMake to locate.
-        log)
-
-find_library (
-        binder_ndk-lib
+find_library(binder_ndk-lib
         binder_ndk
 )
 
-# Specifies libraries CMake should link to your target library. You
-# can link multiple libraries, such as libraries you define in this
-# build script, prebuilt third-party libraries, or system libraries.
-
-add_library( hermes
-        SHARED
-        IMPORTED )
-
-set_target_properties( # Specifies the target library.
-        hermes
-
-        # Specifies the parameter you want to define.
+message(STATUS  "project_dir: ${project_dir}")
+add_library(hermes SHARED IMPORTED)
+set_target_properties(hermes
         PROPERTIES IMPORTED_LOCATION
+        ${project_dir}/build/hermes/jni/${ANDROID_ABI}/libhermes.so
+)
 
-        # Provides the path to the library you want to import.
-        E:/gh-droid/remotejsi/app/build/hermes/jni/${ANDROID_ABI}/libhermes.so )
+add_library(bindercommon
+        SHARED
+        ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IJSIInterface.cpp
+        ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IRemoteJSIInterface.cpp
+        ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IManagerInterface.cpp
+        )
 
-
+target_include_directories (bindercommon
+        PRIVATE
+        ${project_dir}/src/main/cpp/includes
+        includes
+        )
 
 target_link_libraries( # Specifies the target library.
-        remotejsi
+        bindercommon
+        ${log-lib}
+        ${binder_ndk-lib})
+
+add_library(jsiimpl
+        SHARED
+        jsiimpl.cpp JSIService.cpp ManagerService.cpp
+)
+
+target_include_directories (jsiimpl
+        PRIVATE
+        ${project_dir}/src/main/cpp/includes
+        includes
+        ${project_dir}/../node_modules/hermes-engine/android/include
+)
+
+target_link_libraries( # Specifies the target library.
+        jsiimpl
         hermes
-        # Links the target library to the log library
-        # included in the NDK.
+        bindercommon
+        ${log-lib}
+        ${binder_ndk-lib})
+
+
+add_library(jsiproxy
+        SHARED
+        jsiproxy.cpp RemoteJSIService.cpp
+        )
+
+target_include_directories (jsiproxy
+        PRIVATE
+        ${project_dir}/src/main/cpp/includes
+        includes
+        ${project_dir}/../node_modules/hermes-engine/android/include
+        )
+
+target_link_libraries( # Specifies the target library.
+        jsiproxy
+        bindercommon
+        hermes
         ${log-lib}
         ${binder_ndk-lib})
