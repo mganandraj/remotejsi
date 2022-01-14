@@ -64,7 +64,7 @@ target_link_libraries( # Specifies the target library.
 
 add_library(jsiproxy
         SHARED
-        jsiproxy.cpp RemoteJSIService.cpp
+        jsiproxy.cpp JSIProxyRuntime.cpp RemoteJSIService.cpp
         )
 
 target_include_directories (jsiproxy

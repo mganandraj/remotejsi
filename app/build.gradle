@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.remotejsi"
-        minSdk 29 /* Binder native headers not available below */
+        minSdk 30 /* Binder native headers not available below */
         targetSdk 31
         versionCode 1
         versionName "1.0"

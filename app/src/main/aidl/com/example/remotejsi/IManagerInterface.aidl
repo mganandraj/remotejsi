@@ -6,4 +6,5 @@ package com.example.remotejsi;
 interface IManagerInterface {
     void ping();
     IBinder createJSIInterface(IBinder remoteJSIInterface);
+    // IBinder createJSIInterface();
 }

@@ -13,6 +13,8 @@
 #define LOG_TAG "remotejsi-native-lib"
 #include "logging.h"
 
+#include "JSIProxyRuntime.h"
+
 using namespace aidl::com::example::remotejsi;
 using namespace std;
 
@@ -43,14 +45,26 @@ Java_com_example_remotejsi_JSIProxy_onServiceDisconnected(
     LOGD("[App] [cpp] onServiceDisconnected");
 }
 
+class JSI_EXPORT StringBuffer : public facebook::jsi::Buffer {
+public:
+    StringBuffer(std::string s) : s_(std::move(s)) {}
+    size_t size() const override {
+        return s_.size();
+    }
+    const uint8_t* data() const override {
+        return reinterpret_cast<const uint8_t*>(s_.data());
+    }
+
+private:
+    std::string s_;
+};
+
+// std::set<std::unique_ptr<facebook::jsi::Runtime>> g_runtimes;
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_remotejsi_JSIProxy_talkToService(
         JNIEnv* env,
         jobject /* this */)
 {
-    /*::ndk::ScopedAStatus basicTypesResult = g_spManagerService->basicTypes(2021, 65535000,
-                                                               true, 3.14f, 3.141592653589793238, "Hello, World!");*/
-
     ::ndk::ScopedAStatus pingResult = g_spManagerService->ping();
     if(pingResult.isOk())
     {
@@ -61,32 +75,13 @@ Java_com_example_remotejsi_JSIProxy_talkToService(
         LOGE("[App] [cpp] IMyService.ping - Failed");
     }
 
-
-    static std::set<std::shared_ptr<IJSIInterface>> g_jsiServices;
-
-    std::shared_ptr<IJSIInterface> jsiService;
-    ::ndk::SpAIBinder jsiServiceBinder;
-    std::string result;
-
-    static std::set<std::shared_ptr<RemoteJSIService>> g_remoteJSIServices;
-    std::shared_ptr<RemoteJSIService> remoteJSIService = std::make_shared<RemoteJSIService>();
-    g_remoteJSIServices.insert(remoteJSIService);
-
-    ::ndk::SpAIBinder remoteJSIServiceBinder = remoteJSIService->asBinder();
-    ::ndk::ScopedAStatus createJSIResult = g_spManagerService->createJSIInterface(
-            remoteJSIServiceBinder, &jsiServiceBinder);
-    if (createJSIResult.isOk()) {
-        LOGD("[App] [cpp] IMyService.createJSI - Succeeded");
-    } else {
-        LOGE("[App] [cpp] IMyService.createJSI - Failed");
+    {
+        std::unique_ptr<facebook::jsi::Runtime> jsiRuntime = com::example::remotejsi::makeJSIProxyRuntime(g_spManagerService);
+        auto script = std::make_shared<StringBuffer>("\"abcd\"");
+        std::string sourceUrl = "MyScript";
+        jsiRuntime->evaluateJavaScript(script, sourceUrl);
     }
 
-    jsiService = IJSIInterface::fromBinder(jsiServiceBinder);
-    g_jsiServices.insert(jsiService);
-    // ::ndk::ScopedAStatus r = jsiService->basicTypes();
-    jsiService->eval("\"xyz\"", &result);
-    LOGE("[App] [cpp] Successfully called the JSI service result: %s", result.c_str());
-    
     std::string sRet("Succeess");
     return env->NewStringUTF(sRet.c_str());
 }

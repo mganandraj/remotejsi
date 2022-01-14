@@ -28,21 +28,20 @@ private:
 
 namespace aidl::com::example::remotejsi {
 
-::ndk::ScopedAStatus JSIService::basicTypes(int32_t in_anInt, int64_t in_aLong, bool in_aBoolean, float in_aFloat, double in_aDouble, const std::string& in_aString)  {
-    //LOGD("[MyService] [cpp] basicTypes: int=%d, long=%ld, bool=%d, float=%f, double=%f, string=%s",
-   //      in_anInt, in_aLong, in_aBoolean, in_aFloat, in_aDouble, in_aString.c_str());
-
-   return ::ndk::ScopedAStatus::ok();
+JSIService::JSIService(std::shared_ptr<IRemoteJSIInterface> remoteJsiInterface) : remoteJsiInterface_(remoteJsiInterface) {
+    bool isRemote = this->isRemote();
+    runtime_ = facebook::hermes::makeHermesRuntime();
 }
 
 ::ndk::ScopedAStatus JSIService::eval(const std::string& in_aString, std::string* _aidl_return) {
+    bool isRemote = this->isRemote();
+
     auto script = std::make_shared<StringBuffer>(in_aString);
     std::string sourceUrl = "MyScript";
-    std::unique_ptr<facebook::hermes::HermesRuntime> runtime = facebook::hermes::makeHermesRuntime();
-    facebook::jsi::Value result = runtime->evaluateJavaScript(script, sourceUrl);
+    facebook::jsi::Value result = runtime_->evaluateJavaScript(script, sourceUrl);
     if(result.isString()) {
-        facebook::jsi::String stringRes = result.getString(*runtime);
-        *_aidl_return = stringRes.utf8(*runtime);
+        facebook::jsi::String stringRes = result.getString(*runtime_);
+        *_aidl_return = stringRes.utf8(*runtime_);
     } else {
         *_aidl_return = std::string("non-string return value from script evaluation");
     }
@@ -50,30 +49,4 @@ namespace aidl::com::example::remotejsi {
     return ::ndk::ScopedAStatus::ok();
 }
 
-/* ::ndk::ScopedAStatus JSIService::handshake(const ::ndk::SpAIBinder &in_remoteJSIInterface, std::string* _aidl_return) {
-    // std::shared_ptr<IRemoteJSIInterface> g_spRemoteJSIInterface;
-    LOGD("[JSIService] [cpp] handshake");
-    g_spRemoteJSIInterface = IRemoteJSIInterface::fromBinder(in_remoteJSIInterface);
-    LOGD("[JSIService] [cpp] handshake -- received remote interface");
-    g_spRemoteJSIInterface->handshakeAck();
-
-    auto script = std::make_shared<StringBuffer>("\"abcd\"");
-    std::string sourceUrl = "MyScript";
-    std::unique_ptr<facebook::hermes::HermesRuntime> runtime = facebook::hermes::makeHermesRuntime();
-    facebook::jsi::Value result = runtime->evaluateJavaScript(script, sourceUrl);
-    if(result.isString()) {
-        facebook::jsi::String stringRes = result.getString(*runtime);
-        *_aidl_return = stringRes.utf8(*runtime);
-    } else {
-        *_aidl_return = std::string("non-string return value from script evaluation");
-    }
-
-    return ::ndk::ScopedAStatus::ok();
-}*/
-
-/*::ndk::ScopedAStatus get(::ndk::SpAIBinder* _aidl_return) {
-    static RemoteJSIService myService;
-    // ::ndk::SpAIBinder authzBinder(myService.asBinder());
-    *_aidl_return = myService.asBinder();
-}*/
 }

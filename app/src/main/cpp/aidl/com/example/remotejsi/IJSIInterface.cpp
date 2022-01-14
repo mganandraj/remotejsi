@@ -13,41 +13,7 @@ static binder_status_t _aidl_onTransact(AIBinder* _aidl_binder, transaction_code
   binder_status_t _aidl_ret_status = STATUS_UNKNOWN_TRANSACTION;
   std::shared_ptr<BnJSIInterface> _aidl_impl = std::static_pointer_cast<BnJSIInterface>(::ndk::ICInterface::asInterface(_aidl_binder));
   switch (_aidl_code) {
-    case (FIRST_CALL_TRANSACTION + 0 /*basicTypes*/): {
-      int32_t in_anInt;
-      int64_t in_aLong;
-      bool in_aBoolean;
-      float in_aFloat;
-      double in_aDouble;
-      std::string in_aString;
-
-      _aidl_ret_status = AParcel_readInt32(_aidl_in, &in_anInt);
-      if (_aidl_ret_status != STATUS_OK) break;
-
-      _aidl_ret_status = AParcel_readInt64(_aidl_in, &in_aLong);
-      if (_aidl_ret_status != STATUS_OK) break;
-
-      _aidl_ret_status = AParcel_readBool(_aidl_in, &in_aBoolean);
-      if (_aidl_ret_status != STATUS_OK) break;
-
-      _aidl_ret_status = AParcel_readFloat(_aidl_in, &in_aFloat);
-      if (_aidl_ret_status != STATUS_OK) break;
-
-      _aidl_ret_status = AParcel_readDouble(_aidl_in, &in_aDouble);
-      if (_aidl_ret_status != STATUS_OK) break;
-
-      _aidl_ret_status = ::ndk::AParcel_readString(_aidl_in, &in_aString);
-      if (_aidl_ret_status != STATUS_OK) break;
-
-      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->basicTypes(in_anInt, in_aLong, in_aBoolean, in_aFloat, in_aDouble, in_aString);
-      _aidl_ret_status = AParcel_writeStatusHeader(_aidl_out, _aidl_status.get());
-      if (_aidl_ret_status != STATUS_OK) break;
-
-      if (!AStatus_isOk(_aidl_status.get())) break;
-
-      break;
-    }
-    case (FIRST_CALL_TRANSACTION + 1 /*eval*/): {
+    case (FIRST_CALL_TRANSACTION + 0 /*eval*/): {
       std::string in_aString;
       std::string _aidl_return;
 
@@ -74,57 +40,6 @@ static AIBinder_Class* _g_aidl_clazz = ::ndk::ICInterface::defineClass(IJSIInter
 BpJSIInterface::BpJSIInterface(const ::ndk::SpAIBinder& binder) : BpCInterface(binder) {}
 BpJSIInterface::~BpJSIInterface() {}
 
-::ndk::ScopedAStatus BpJSIInterface::basicTypes(int32_t in_anInt, int64_t in_aLong, bool in_aBoolean, float in_aFloat, double in_aDouble, const std::string& in_aString) {
-  binder_status_t _aidl_ret_status = STATUS_OK;
-  ::ndk::ScopedAStatus _aidl_status;
-  ::ndk::ScopedAParcel _aidl_in;
-  ::ndk::ScopedAParcel _aidl_out;
-
-  _aidl_ret_status = AIBinder_prepareTransaction(asBinder().get(), _aidl_in.getR());
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = AParcel_writeInt32(_aidl_in.get(), in_anInt);
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = AParcel_writeInt64(_aidl_in.get(), in_aLong);
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = AParcel_writeBool(_aidl_in.get(), in_aBoolean);
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = AParcel_writeFloat(_aidl_in.get(), in_aFloat);
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = AParcel_writeDouble(_aidl_in.get(), in_aDouble);
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = ::ndk::AParcel_writeString(_aidl_in.get(), in_aString);
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = AIBinder_transact(
-    asBinder().get(),
-    (FIRST_CALL_TRANSACTION + 0 /*basicTypes*/),
-    _aidl_in.getR(),
-    _aidl_out.getR(),
-    0
-    #ifdef BINDER_STABILITY_SUPPORT
-    | FLAG_PRIVATE_LOCAL
-    #endif  // BINDER_STABILITY_SUPPORT
-    );
-  if (_aidl_ret_status == STATUS_UNKNOWN_TRANSACTION && IJSIInterface::getDefaultImpl()) {
-    return IJSIInterface::getDefaultImpl()->basicTypes(in_anInt, in_aLong, in_aBoolean, in_aFloat, in_aDouble, in_aString);
-  }
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  _aidl_ret_status = AParcel_readStatusHeader(_aidl_out.get(), _aidl_status.getR());
-  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
-
-  if (!AStatus_isOk(_aidl_status.get())) return _aidl_status;
-
-  _aidl_error:
-  _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
-  return _aidl_status;
-}
 ::ndk::ScopedAStatus BpJSIInterface::eval(const std::string& in_aString, std::string* _aidl_return) {
   binder_status_t _aidl_ret_status = STATUS_OK;
   ::ndk::ScopedAStatus _aidl_status;
@@ -139,7 +54,7 @@ BpJSIInterface::~BpJSIInterface() {}
 
   _aidl_ret_status = AIBinder_transact(
     asBinder().get(),
-    (FIRST_CALL_TRANSACTION + 1 /*eval*/),
+    (FIRST_CALL_TRANSACTION + 0 /*eval*/),
     _aidl_in.getR(),
     _aidl_out.getR(),
     0
@@ -214,11 +129,6 @@ const std::shared_ptr<IJSIInterface>& IJSIInterface::getDefaultImpl() {
   return IJSIInterface::default_impl;
 }
 std::shared_ptr<IJSIInterface> IJSIInterface::default_impl = nullptr;
-::ndk::ScopedAStatus IJSIInterfaceDefault::basicTypes(int32_t /*in_anInt*/, int64_t /*in_aLong*/, bool /*in_aBoolean*/, float /*in_aFloat*/, double /*in_aDouble*/, const std::string& /*in_aString*/) {
-  ::ndk::ScopedAStatus _aidl_status;
-  _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
-  return _aidl_status;
-}
 ::ndk::ScopedAStatus IJSIInterfaceDefault::eval(const std::string& /*in_aString*/, std::string* /*_aidl_return*/) {
   ::ndk::ScopedAStatus _aidl_status;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
