@@ -27,11 +27,7 @@ Java_com_example_remotejsi_JSIProxy_onServiceConnected(
         jobject /* this */,
         jobject binder)
 {
-    AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
-
-    const ::ndk::SpAIBinder spBinder(pBinder);
-    g_spManagerService = IManagerInterface::fromBinder(spBinder);
-
+    g_spManagerService = IManagerInterface::fromBinder(::ndk::SpAIBinder(AIBinder_fromJavaBinder(env, binder)));
     LOGD("[App] [cpp] onServiceConnected");
 }
 
@@ -41,7 +37,6 @@ Java_com_example_remotejsi_JSIProxy_onServiceDisconnected(
         jobject /* this */)
 {
     g_spManagerService = nullptr;
-
     LOGD("[App] [cpp] onServiceDisconnected");
 }
 
@@ -59,7 +54,6 @@ private:
     std::string s_;
 };
 
-// std::set<std::unique_ptr<facebook::jsi::Runtime>> g_runtimes;
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_remotejsi_JSIProxy_talkToService(
         JNIEnv* env,
@@ -77,7 +71,7 @@ Java_com_example_remotejsi_JSIProxy_talkToService(
 
     {
         std::unique_ptr<facebook::jsi::Runtime> jsiRuntime = com::example::remotejsi::makeJSIProxyRuntime(g_spManagerService);
-        auto script = std::make_shared<StringBuffer>("\"abcd\"");
+        auto script = std::make_shared<StringBuffer>("\"Hello from Anand ! \"");
         std::string sourceUrl = "MyScript";
         jsiRuntime->evaluateJavaScript(script, sourceUrl);
     }
