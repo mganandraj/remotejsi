@@ -72,6 +72,8 @@ public:
 
     void setDescription(const std::string &desc);
 
+    jsi::Value createValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIValueInterface> value) const;
+
     // Please don't use the following two functions, only exposed for
     // integration efforts.
     /*JSGlobalContextRef getContext() {
@@ -300,21 +302,7 @@ jsi::Value JSIProxyRuntime::evaluatePreparedJavaScript(
     return jsi::Value::undefined();
 }
 
-jsi::Value JSIProxyRuntime::evaluateJavaScript(
-        const std::shared_ptr<const jsi::Buffer> &buffer,
-        const std::string &sourceURL) {
-
-    // std::string script (reinterpret_cast<const char*>(buffer->data()), buffer->size());
-    auto jsiBufferService = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIBufferService>(std::move(buffer));
-
-    // remoteJSIService_->handshakeAck();
-
-    std::string result;
-    ::ndk::SpAIBinder resultBinder;
-    jsiService_->eval(jsiBufferService->asBinder(), sourceURL, &resultBinder);
-    LOGE("[App] [cpp] Successfully called the JSI service result: %s", result.c_str());
-
-    auto jsiValueService = aidl::com::example::remotejsi::JSIValueService::fromBinder(resultBinder);
+jsi::Value JSIProxyRuntime::createValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIValueInterface> jsiValueService) const {
     int8_t jsiValueType;
     jsiValueService->getType(&jsiValueType);
 
@@ -370,6 +358,15 @@ jsi::Value JSIProxyRuntime::evaluateJavaScript(
     }
 
     return resultJSValue;
+}
+
+jsi::Value JSIProxyRuntime::evaluateJavaScript(
+        const std::shared_ptr<const jsi::Buffer> &buffer,
+        const std::string &sourceURL) {
+    auto jsiBufferService = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIBufferService>(std::move(buffer));
+    ::ndk::SpAIBinder resultBinder;
+    jsiService_->eval(jsiBufferService->asBinder(), sourceURL, &resultBinder);
+    return createValue(aidl::com::example::remotejsi::JSIValueService::fromBinder(resultBinder));
 }
 
 jsi::Object JSIProxyRuntime::global() {
