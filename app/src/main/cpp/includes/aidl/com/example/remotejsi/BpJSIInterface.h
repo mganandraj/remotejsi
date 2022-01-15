@@ -13,7 +13,7 @@ public:
   BpJSIInterface(const ::ndk::SpAIBinder& binder);
   virtual ~BpJSIInterface();
 
-  ::ndk::ScopedAStatus eval(const std::string& in_aString, std::string* _aidl_return) override;
+  ::ndk::ScopedAStatus eval(const ::ndk::SpAIBinder& in_bufferBinder, const std::string& in_sourceURL, ::ndk::SpAIBinder* _aidl_return) override;
 };
 }  // namespace remotejsi
 }  // namespace example

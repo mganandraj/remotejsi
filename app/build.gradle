@@ -92,47 +92,23 @@ task compileAidlNdk() {
         def searchPathForImports = [projectDir.absolutePath,
                                     'src', 'main', 'aidl'].join(File.separator)
 
-        def aidlFile = [projectDir.absolutePath,
+        def aidlFiles = ['IJSIInterface.aidl', 'IRemoteJSIInterface.aidl',
+                         'IManagerInterface.aidl', 'IJSIBufferInterface.aidl',
+                         'IJSIValueInterface.aidl', 'IJSIStringInterface.aidl', 'IJSIObjectInterface.aidl',
+                         'IJSISymbolInterface.aidl']
+
+        for (file in aidlFiles) {
+            exec {
+                executable(aidlCpp)
+                args('--lang=ndk',
+                        '-o', outDir,
+                        '-h', headerOutDir,
+                        '-I', searchPathForImports,
+                        [projectDir.absolutePath,
                         'src', 'main', 'aidl',
-                        'com', 'example', 'remotejsi', 'IJSIInterface.aidl'].join(File.separator)
-
-        def aidlFile2 = [projectDir.absolutePath,
-                        'src', 'main', 'aidl',
-                        'com', 'example', 'remotejsi', 'IRemoteJSIInterface.aidl'].join(File.separator)
-
-        def aidlFile3 = [projectDir.absolutePath,
-                         'src', 'main', 'aidl',
-                         'com', 'example', 'remotejsi', 'IManagerInterface.aidl'].join(File.separator)
-
-
-        exec {
-            executable(aidlCpp)
-            args('--lang=ndk',
-                    '-o', outDir,
-                    '-h', headerOutDir,
-                    '-I', searchPathForImports,
-                    aidlFile)
+                        'com', 'example', 'remotejsi', file].join(File.separator))
+            }
         }
-
-        exec {
-            executable(aidlCpp)
-            args('--lang=ndk',
-                    '-o', outDir,
-                    '-h', headerOutDir,
-                    '-I', searchPathForImports,
-                    aidlFile2)
-        }
-
-        exec {
-            executable(aidlCpp)
-            args('--lang=ndk',
-                    '-o', outDir,
-                    '-h', headerOutDir,
-                    '-I', searchPathForImports,
-                    aidlFile3)
-        }
-
-
     }
 }
 

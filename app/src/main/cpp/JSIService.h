@@ -16,10 +16,10 @@ namespace aidl::com::example::remotejsi {
 class JSIService : public BnJSIInterface {
 public:
     JSIService(std::shared_ptr<IRemoteJSIInterface> remoteJsiInterface);
-    ::ndk::ScopedAStatus eval(const std::string& in_aString, std::string* _aidl_return) override;
+    ::ndk::ScopedAStatus eval(const ::ndk::SpAIBinder& in_bufferBinder, const std::string& in_sourceURL, ::ndk::SpAIBinder* _aidl_return) override;
 
 private:
-    std::unique_ptr<facebook::hermes::HermesRuntime> runtime_;
+    std::shared_ptr<facebook::hermes::HermesRuntime> runtime_;
     std::shared_ptr<IRemoteJSIInterface> remoteJsiInterface_;
 };
 }

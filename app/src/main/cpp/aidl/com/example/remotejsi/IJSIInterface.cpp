@@ -14,19 +14,23 @@ static binder_status_t _aidl_onTransact(AIBinder* _aidl_binder, transaction_code
   std::shared_ptr<BnJSIInterface> _aidl_impl = std::static_pointer_cast<BnJSIInterface>(::ndk::ICInterface::asInterface(_aidl_binder));
   switch (_aidl_code) {
     case (FIRST_CALL_TRANSACTION + 0 /*eval*/): {
-      std::string in_aString;
-      std::string _aidl_return;
+      ::ndk::SpAIBinder in_bufferBinder;
+      std::string in_sourceURL;
+      ::ndk::SpAIBinder _aidl_return;
 
-      _aidl_ret_status = ::ndk::AParcel_readString(_aidl_in, &in_aString);
+      _aidl_ret_status = ::ndk::AParcel_readRequiredStrongBinder(_aidl_in, &in_bufferBinder);
       if (_aidl_ret_status != STATUS_OK) break;
 
-      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->eval(in_aString, &_aidl_return);
+      _aidl_ret_status = ::ndk::AParcel_readString(_aidl_in, &in_sourceURL);
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->eval(in_bufferBinder, in_sourceURL, &_aidl_return);
       _aidl_ret_status = AParcel_writeStatusHeader(_aidl_out, _aidl_status.get());
       if (_aidl_ret_status != STATUS_OK) break;
 
       if (!AStatus_isOk(_aidl_status.get())) break;
 
-      _aidl_ret_status = ::ndk::AParcel_writeString(_aidl_out, _aidl_return);
+      _aidl_ret_status = ::ndk::AParcel_writeRequiredStrongBinder(_aidl_out, _aidl_return);
       if (_aidl_ret_status != STATUS_OK) break;
 
       break;
@@ -40,7 +44,7 @@ static AIBinder_Class* _g_aidl_clazz = ::ndk::ICInterface::defineClass(IJSIInter
 BpJSIInterface::BpJSIInterface(const ::ndk::SpAIBinder& binder) : BpCInterface(binder) {}
 BpJSIInterface::~BpJSIInterface() {}
 
-::ndk::ScopedAStatus BpJSIInterface::eval(const std::string& in_aString, std::string* _aidl_return) {
+::ndk::ScopedAStatus BpJSIInterface::eval(const ::ndk::SpAIBinder& in_bufferBinder, const std::string& in_sourceURL, ::ndk::SpAIBinder* _aidl_return) {
   binder_status_t _aidl_ret_status = STATUS_OK;
   ::ndk::ScopedAStatus _aidl_status;
   ::ndk::ScopedAParcel _aidl_in;
@@ -49,7 +53,10 @@ BpJSIInterface::~BpJSIInterface() {}
   _aidl_ret_status = AIBinder_prepareTransaction(asBinder().get(), _aidl_in.getR());
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
-  _aidl_ret_status = ::ndk::AParcel_writeString(_aidl_in.get(), in_aString);
+  _aidl_ret_status = ::ndk::AParcel_writeRequiredStrongBinder(_aidl_in.get(), in_bufferBinder);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = ::ndk::AParcel_writeString(_aidl_in.get(), in_sourceURL);
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
   _aidl_ret_status = AIBinder_transact(
@@ -63,7 +70,7 @@ BpJSIInterface::~BpJSIInterface() {}
     #endif  // BINDER_STABILITY_SUPPORT
     );
   if (_aidl_ret_status == STATUS_UNKNOWN_TRANSACTION && IJSIInterface::getDefaultImpl()) {
-    return IJSIInterface::getDefaultImpl()->eval(in_aString, _aidl_return);
+    return IJSIInterface::getDefaultImpl()->eval(in_bufferBinder, in_sourceURL, _aidl_return);
   }
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
@@ -72,7 +79,7 @@ BpJSIInterface::~BpJSIInterface() {}
 
   if (!AStatus_isOk(_aidl_status.get())) return _aidl_status;
 
-  _aidl_ret_status = ::ndk::AParcel_readString(_aidl_out.get(), _aidl_return);
+  _aidl_ret_status = ::ndk::AParcel_readRequiredStrongBinder(_aidl_out.get(), _aidl_return);
   if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
 
   _aidl_error:
@@ -129,7 +136,7 @@ const std::shared_ptr<IJSIInterface>& IJSIInterface::getDefaultImpl() {
   return IJSIInterface::default_impl;
 }
 std::shared_ptr<IJSIInterface> IJSIInterface::default_impl = nullptr;
-::ndk::ScopedAStatus IJSIInterfaceDefault::eval(const std::string& /*in_aString*/, std::string* /*_aidl_return*/) {
+::ndk::ScopedAStatus IJSIInterfaceDefault::eval(const ::ndk::SpAIBinder& /*in_bufferBinder*/, const std::string& /*in_sourceURL*/, ::ndk::SpAIBinder* /*_aidl_return*/) {
   ::ndk::ScopedAStatus _aidl_status;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
   return _aidl_status;

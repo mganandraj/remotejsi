@@ -71,7 +71,7 @@ Java_com_example_remotejsi_JSIProxy_talkToService(
 
     {
         std::unique_ptr<facebook::jsi::Runtime> jsiRuntime = com::example::remotejsi::makeJSIProxyRuntime(g_spManagerService);
-        auto script = std::make_shared<StringBuffer>("\"Hello from Anand ! \"");
+        auto script = std::make_shared<StringBuffer>("\"abcde\"");
         std::string sourceUrl = "MyScript";
         jsiRuntime->evaluateJavaScript(script, sourceUrl);
     }

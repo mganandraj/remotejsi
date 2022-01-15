@@ -28,13 +28,13 @@ public:
   static binder_status_t readFromParcel(const AParcel* parcel, std::shared_ptr<IJSIInterface>* instance);
   static bool setDefaultImpl(std::shared_ptr<IJSIInterface> impl);
   static const std::shared_ptr<IJSIInterface>& getDefaultImpl();
-  virtual ::ndk::ScopedAStatus eval(const std::string& in_aString, std::string* _aidl_return) = 0;
+  virtual ::ndk::ScopedAStatus eval(const ::ndk::SpAIBinder& in_bufferBinder, const std::string& in_sourceURL, ::ndk::SpAIBinder* _aidl_return) = 0;
 private:
   static std::shared_ptr<IJSIInterface> default_impl;
 };
 class IJSIInterfaceDefault : public IJSIInterface {
 public:
-  ::ndk::ScopedAStatus eval(const std::string& in_aString, std::string* _aidl_return) override;
+  ::ndk::ScopedAStatus eval(const ::ndk::SpAIBinder& in_bufferBinder, const std::string& in_sourceURL, ::ndk::SpAIBinder* _aidl_return) override;
   ::ndk::SpAIBinder asBinder() override;
   bool isRemote() override;
 };

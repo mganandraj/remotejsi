@@ -24,6 +24,9 @@
 #include "JSIService.h"
 #include "RemoteJSIService.h"
 #include "ManagerService.h"
+#include "JSIBufferService.h"
+#include "JSIValueService.h"
+#include "JSIStringService.h"
 
 #define LOG_TAG "JSIProxyRuntime"
 #include "logging.h"
@@ -301,15 +304,72 @@ jsi::Value JSIProxyRuntime::evaluateJavaScript(
         const std::shared_ptr<const jsi::Buffer> &buffer,
         const std::string &sourceURL) {
 
-    std::string script (reinterpret_cast<const char*>(buffer->data()), buffer->size());
+    // std::string script (reinterpret_cast<const char*>(buffer->data()), buffer->size());
+    auto jsiBufferService = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIBufferService>(std::move(buffer));
+
+    // remoteJSIService_->handshakeAck();
+
     std::string result;
-
-    remoteJSIService_->handshakeAck();
-
-    jsiService_->eval(script, &result);
+    ::ndk::SpAIBinder resultBinder;
+    jsiService_->eval(jsiBufferService->asBinder(), sourceURL, &resultBinder);
     LOGE("[App] [cpp] Successfully called the JSI service result: %s", result.c_str());
 
-    return jsi::Value::undefined();
+    auto jsiValueService = aidl::com::example::remotejsi::JSIValueService::fromBinder(resultBinder);
+    int8_t jsiValueType;
+    jsiValueService->getType(&jsiValueType);
+
+    // Undefined: 0
+    // Null: 1
+    // Boolean: 2
+    // Number: 3
+    // Symbol: 4
+    // String: 5
+    // Object: 6
+
+    jsi::Value resultJSValue;
+    switch (jsiValueType) {
+        case 0:
+            resultJSValue = jsi::Value::undefined();
+            LOGE("[App] [cpp] Successfully retrieved result from binder: <undefined>");
+            break;
+        case 1:
+            resultJSValue = jsi::Value::null();
+            LOGE("[App] [cpp] Successfully retrieved result from binder: <null>");
+            break;
+        case 2:
+            bool resultBool;
+            jsiValueService->getBoolean(&resultBool);
+            LOGE("[App] [cpp] Successfully retrieved result from binder: %s", resultBool? "true" : "false");
+            break;
+        case 3:
+            double resultDouble;
+            jsiValueService->getNumber(&resultDouble);
+            LOGE("[App] [cpp] Successfully retrieved result from binder: %d", resultDouble);
+            break;
+        case 4: {
+            ::ndk::SpAIBinder resultSymbolBinder;
+            jsiValueService->getSymbol(&resultSymbolBinder);
+            LOGE("[App] [cpp] Successfully retrieved symbol from binder");
+        }
+            break;
+        case 5: {
+            ::ndk::SpAIBinder resultStringBinder;
+            jsiValueService->getString(&resultStringBinder);
+            auto jsiStringService = aidl::com::example::remotejsi::JSIStringService::fromBinder(resultStringBinder);
+            std::string resultString;
+            jsiStringService->utf8(&resultString);
+            LOGE("[App] [cpp] Successfully retrieved string from binder: %s", resultString.c_str());
+        }
+            break;
+        case 6: {
+            ::ndk::SpAIBinder resultObjectBinder;
+            jsiValueService->getObject(&resultObjectBinder);
+            LOGE("[App] [cpp] Successfully retrieved object from binder");
+        }
+            break;
+    }
+
+    return resultJSValue;
 }
 
 jsi::Object JSIProxyRuntime::global() {
