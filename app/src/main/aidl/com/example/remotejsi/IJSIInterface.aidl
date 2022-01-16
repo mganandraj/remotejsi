@@ -8,4 +8,9 @@ interface IJSIInterface {
 
     // Returns JSValueBinder
     IBinder eval(IBinder bufferBinder, String sourceURL);
+
+    IBinder createObject();
+
+    IBinder createFromAscii(in byte[] chars, long length);
+    IBinder createFromUtf8(in byte[] bytes, long length);
 }

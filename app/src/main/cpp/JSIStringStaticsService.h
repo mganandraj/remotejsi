@@ -1,0 +1,14 @@
+//
+// Created by anandrag on 1/15/2022.
+//
+
+#ifndef REMOTEJSI_JSISTRINGSTATICSSERVICE_H
+#define REMOTEJSI_JSISTRINGSTATICSSERVICE_H
+
+
+class JSIStringStaticsService {
+
+};
+
+
+#endif //REMOTEJSI_JSISTRINGSTATICSSERVICE_H

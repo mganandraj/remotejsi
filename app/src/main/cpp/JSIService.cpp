@@ -7,6 +7,9 @@
 #include "RemoteJSIService.h"
 #include "JSIBufferService.h"
 #include "JSIValueService.h"
+#include "JSIObjectService.h"
+#include "JSIStringService.h"
+#include "JSISymbolService.h"
 
 #include <hermes/hermes.h>
 #include <jsi/jsi.h>
@@ -63,22 +66,32 @@ JSIService::JSIService(std::shared_ptr<IRemoteJSIInterface> remoteJsiInterface) 
     auto jsiBufferService = IJSIBufferInterface::fromBinder(in_bufferBinder);
     auto script = std::make_shared<BinderBuffer>(jsiBufferService);
     std::string sourceUrl = "MyScript";
-    LOGD("Evaluating script");
     std::string scriptstr((const char*)script->data(), script->size());
-    LOGD("Evaluating %s", scriptstr.c_str());
-    // facebook::jsi::Value result = runtime_->evaluateJavaScript(std::make_shared<StringBuffer>(scriptstr), sourceUrl);
     facebook::jsi::Value result = runtime_->evaluateJavaScript(script, sourceUrl);
-/*    LOGD("Done evaluation");
-    if(result.isString()) {
-        facebook::jsi::String stringRes = result.getString(*runtime_);
-        *_aidl_return = stringRes.utf8(*runtime_);
-    } else {
-        *_aidl_return = std::string("non-string return value from script evaluation");
-    }*/
 
     auto jsiValueService = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIValueService>(runtime_, std::move(result));
     *_aidl_return = jsiValueService->asBinder();
 
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus JSIService::createObject(::ndk::SpAIBinder* _aidl_return) {
+    facebook::jsi::Object obj(*runtime_);
+    *_aidl_return = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIObjectService>(runtime_, std::move(obj))->asBinder();
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus JSIService::createFromAscii(const std::vector<int8_t>& in_chars, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) {
+    const char* chars = reinterpret_cast<const char* >(const_cast<signed char*>(in_chars.data()));
+    facebook::jsi::String str = facebook::jsi::String::createFromAscii(*runtime_, chars, in_length);
+    *_aidl_return = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIStringService>(runtime_, std::move(str))->asBinder();
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus JSIService::createFromUtf8(const std::vector<int8_t>& in_chars, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) {
+    const uint8_t* chars = reinterpret_cast<const uint8_t* >(const_cast<signed char*>(in_chars.data()));
+    facebook::jsi::String str = facebook::jsi::String::createFromUtf8(*runtime_, chars, in_length);
+    *_aidl_return = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIStringService>(runtime_, std::move(str))->asBinder();
     return ::ndk::ScopedAStatus::ok();
 }
 

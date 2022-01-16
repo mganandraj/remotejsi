@@ -27,6 +27,8 @@
 #include "JSIBufferService.h"
 #include "JSIValueService.h"
 #include "JSIStringService.h"
+#include "JSIObjectService.h"
+#include "JSISymbolService.h"
 
 #define LOG_TAG "JSIProxyRuntime"
 #include "logging.h"
@@ -74,6 +76,16 @@ public:
 
     jsi::Value createValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIValueInterface> value) const;
 
+    jsi::String createStringValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> value) const;
+    jsi::Object createObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> value) const;
+    jsi::Symbol createSymbolValue(std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> value) const;
+
+    // Used by factory methods and clone methods
+    jsi::Runtime::PointerValue *makeSymbolValue(std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> value) const;
+    jsi::Runtime::PointerValue *makeStringValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> value) const;
+    jsi::Runtime::PointerValue *makeObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> value) const;
+
+
     // Please don't use the following two functions, only exposed for
     // integration efforts.
     /*JSGlobalContextRef getContext() {
@@ -89,24 +101,57 @@ public:
 protected:
     // friend class detail::ArgsConverter;
     class JSIProxySymbolValue final : public PointerValue {
-
+#ifndef NDEBUG
+        JSIProxySymbolValue(std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> sym
+        , std::atomic<intptr_t> &counter);
+#else
+        JSIProxySymbolValue(std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> sym);
+#endif
         void invalidate() override;
 
     protected:
         friend class JSIProxyRuntime;
+
+    private:
+#ifndef NDEBUG
+        std::atomic<intptr_t> &counter_;
+#endif
+        std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> sym_;
     };
 
     class JSIProxyStringValue final : public PointerValue {
+#ifndef NDEBUG
+        JSIProxyStringValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> str
+                , std::atomic<intptr_t> &counter);
+#else
+        JSIProxyStringValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> str);
+#endif
         void invalidate() override;
 
     protected:
         friend class JSIProxyRuntime;
+    private:
+#ifndef NDEBUG
+        std::atomic<intptr_t> &counter_;
+#endif
+        std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> str_;
     };
 
     class JSIProxyObjectValue final : public PointerValue {
+#ifndef NDEBUG
+        JSIProxyObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> obj
+                , std::atomic<intptr_t> &counter);
+#else
+        JSIProxyObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> obj);
+#endif
         void invalidate() override;
     protected:
         friend class JSIProxyRuntime;
+    private:
+#ifndef NDEBUG
+        std::atomic<intptr_t> &counter_;
+#endif
+        std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> obj_;
     };
 
     PointerValue *cloneSymbol(const Runtime::PointerValue *pv) override;
@@ -302,6 +347,44 @@ jsi::Value JSIProxyRuntime::evaluatePreparedJavaScript(
     return jsi::Value::undefined();
 }
 
+jsi::Runtime::PointerValue *JSIProxyRuntime::makeSymbolValue(std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> value) const {
+#ifndef NDEBUG
+    return new JSIProxySymbolValue(value, symbolCounter_);
+#else
+    return new JSIProxySymbolValue(value);
+#endif
+}
+
+jsi::Runtime::PointerValue *JSIProxyRuntime::makeStringValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> value) const {
+    // TODO Make sure binder is valid
+#ifndef NDEBUG
+    return new JSIProxyStringValue(value, stringCounter_);
+#else
+    return new JSIProxyStringValue(value);
+#endif
+}
+
+jsi::Runtime::PointerValue *JSIProxyRuntime::makeObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> value) const {
+#ifndef NDEBUG
+    return new JSIProxyObjectValue(value, objectCounter_);
+#else
+    return new JSIProxyObjectValue(value);
+#endif
+}
+
+jsi::String JSIProxyRuntime::createStringValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> value) const {
+    return make<jsi::String>(makeStringValue(value));
+}
+
+jsi::Object JSIProxyRuntime::createObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> value) const {
+    return make<jsi::Object>(makeObjectValue(value));
+}
+
+jsi::Symbol JSIProxyRuntime::createSymbolValue(std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> value) const {
+    return make<jsi::Symbol>(makeSymbolValue(value));
+}
+
+
 jsi::Value JSIProxyRuntime::createValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIValueInterface> jsiValueService) const {
     int8_t jsiValueType;
     jsiValueService->getType(&jsiValueType);
@@ -328,31 +411,39 @@ jsi::Value JSIProxyRuntime::createValue(std::shared_ptr<aidl::com::example::remo
             bool resultBool;
             jsiValueService->getBoolean(&resultBool);
             LOGE("[App] [cpp] Successfully retrieved result from binder: %s", resultBool? "true" : "false");
+            resultJSValue = jsi::Value(resultBool);
             break;
         case 3:
             double resultDouble;
             jsiValueService->getNumber(&resultDouble);
             LOGE("[App] [cpp] Successfully retrieved result from binder: %d", resultDouble);
+            resultJSValue = jsi::Value(resultDouble);
             break;
         case 4: {
             ::ndk::SpAIBinder resultSymbolBinder;
             jsiValueService->getSymbol(&resultSymbolBinder);
             LOGE("[App] [cpp] Successfully retrieved symbol from binder");
+            auto jsiSymbolService = aidl::com::example::remotejsi::JSISymbolService::fromBinder(resultSymbolBinder);
+            resultJSValue = createSymbolValue(jsiSymbolService);
         }
             break;
         case 5: {
             ::ndk::SpAIBinder resultStringBinder;
             jsiValueService->getString(&resultStringBinder);
             auto jsiStringService = aidl::com::example::remotejsi::JSIStringService::fromBinder(resultStringBinder);
-            std::string resultString;
-            jsiStringService->utf8(&resultString);
-            LOGE("[App] [cpp] Successfully retrieved string from binder: %s", resultString.c_str());
+            // std::string resultString;
+            // jsiStringService->utf8(&resultString);
+            // LOGE("[App] [cpp] Successfully retrieved string from binder: %s", resultString.c_str());
+            LOGE("[App] [cpp] Successfully retrieved string from binder");
+            resultJSValue = createStringValue(jsiStringService);
         }
             break;
         case 6: {
             ::ndk::SpAIBinder resultObjectBinder;
             jsiValueService->getObject(&resultObjectBinder);
             LOGE("[App] [cpp] Successfully retrieved object from binder");
+            auto jsiObjectService = aidl::com::example::remotejsi::JSIObjectService::fromBinder(resultObjectBinder);
+            resultJSValue = createObjectValue(jsiObjectService);
         }
             break;
     }
@@ -388,88 +479,46 @@ bool JSIProxyRuntime::isInspectable() {
     return false;
 }
 
-/*
+#ifndef NDEBUG
 JSIProxyRuntime::JSIProxySymbolValue::JSIProxySymbolValue(
-        JSGlobalContextRef ctx,
-        const std::atomic<bool> &ctxInvalid,
-        JSValueRef sym
-#ifndef NDEBUG
-        ,
-        std::atomic<intptr_t> &counter
-#endif
-)
-        : ctx_(ctx),
-          ctxInvalid_(ctxInvalid),
-          sym_(sym)
-#ifndef NDEBUG
-        ,
-          counter_(counter)
-#endif
-{
-    assert(smellsLikeES6Symbol(ctx_, sym_));
-    JSValueProtect(ctx_, sym_);
-#ifndef NDEBUG
+        std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> sym
+            ,std::atomic<intptr_t> &counter): sym_(sym), counter_(counter) {
     counter_ += 1;
-#endif
 }
-*/
+#else
+    JSIProxyRuntime::JSIProxySymbolValue::JSIProxySymbolValue(
+        std::shared_ptr<aidl::com::example::remotejsi::IJSISymbolInterface> sym) {}
+
+#endif
 
 void JSIProxyRuntime::JSIProxySymbolValue::invalidate() {
-//#ifndef NDEBUG
-//    counter_ -= 1;
-//#endif
-//
-//    if (!ctxInvalid_) {
-//        JSValueUnprotect(ctx_, sym_);
-//    }
-//    delete this;
+    delete this;
 }
 
-//#ifndef NDEBUG
-//        JSIProxyRuntime::JSIProxyStringValue::JSIProxyStringValue(
-//                JSStringRef str,
-//                std::atomic<intptr_t> &counter)
-//                : str_(JSStringRetain(str)), counter_(counter) {
-//            // Since std::atomic returns a copy instead of a reference when calling
-//            // operator+= we must do this explicitly in the constructor
-//            counter_ += 1;
-//        }
-//#else
-//        JSIProxyRuntime::JSIProxyStringValue::JSIProxyStringValue(JSStringRef str)
-//    : str_(JSStringRetain(str)) {}
-//#endif
+#ifndef NDEBUG
+        JSIProxyRuntime::JSIProxyStringValue::JSIProxyStringValue(
+            std::shared_ptr<aidl::com::example::remotejsi::IJSIStringInterface> str,
+            std::atomic<intptr_t> &counter)
+            : str_(str), counter_(counter) {
+                counter_ += 1;
+        }
+#else
+        JSIProxyRuntime::JSIProxyStringValue::JSIProxyStringValue(JSStringRef str)
+            : str_(str) {}
+#endif
 
 void JSIProxyRuntime::JSIProxyStringValue::invalidate() {
-    // These JSIProxy{String,Object}Value objects are implicitly owned by the
-    // {String,Object} objects, thus when a String/Object is destructed
-    // the JSIProxy{String,Object}Value should be released.
-
+    delete this;
 }
 
-//
-//JSIProxyRuntime::JSIProxyObjectValue::JSIProxyObjectValue(
-//        JSGlobalContextRef ctx,
-//        const std::atomic<bool> &ctxInvalid,
-//        JSObjectRef obj
-//#ifndef NDEBUG
-//        ,
-//        std::atomic<intptr_t> &counter
-//#endif
-//)
-//        : ctx_(ctx),
-//          ctxInvalid_(ctxInvalid),
-//          obj_(obj)
-//#ifndef NDEBUG
-//        ,
-//          counter_(counter)
-//#endif
-//{
-//    JSValueProtect(ctx_, obj_);
-//#ifndef NDEBUG
-//    counter_ += 1;
-//#endif
-//}
 
+#ifndef NDEBUG
+    JSIProxyRuntime::JSIProxyObjectValue::JSIProxyObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> obj
+        , std::atomic<intptr_t> &counter):obj_(obj), counter_(counter) {counter_ += 1;}
+#else
+    JSIProxyRuntime::JSIProxyObjectValue::JSIProxyObjectValue(std::shared_ptr<aidl::com::example::remotejsi::IJSIObjectInterface> obj)
+        :obj_(obj) {}
+#endif
 
 void JSIProxyRuntime::JSIProxyObjectValue::invalidate() {
     delete this;
@@ -477,41 +526,38 @@ void JSIProxyRuntime::JSIProxyObjectValue::invalidate() {
 
 jsi::Runtime::PointerValue *JSIProxyRuntime::cloneSymbol(
         const jsi::Runtime::PointerValue *pv) {
-//            if (!pv) {
-//                return nullptr;
-//            }
-//            const JSIProxySymbolValue *symbol = static_cast<const JSIProxySymbolValue *>(pv);
-//            return makeSymbolValue(symbol->sym_);
+            if (!pv) {
+                return nullptr;
+            }
+            const JSIProxySymbolValue *symbol = static_cast<const JSIProxySymbolValue *>(pv);
+            return makeSymbolValue(symbol->sym_);
 }
 
 jsi::Runtime::PointerValue *JSIProxyRuntime::cloneString(
         const jsi::Runtime::PointerValue *pv) {
-//            if (!pv) {
-//                return nullptr;
-//            }
-//            const JSIProxyStringValue *string = static_cast<const JSIProxyStringValue *>(pv);
-//            return makeStringValue(string->str_);
+            if (!pv) {
+                return nullptr;
+            }
+            const JSIProxyStringValue *string = static_cast<const JSIProxyStringValue *>(pv);
+            return makeStringValue(string->str_);
 }
 
 jsi::Runtime::PointerValue *JSIProxyRuntime::cloneObject(
         const jsi::Runtime::PointerValue *pv) {
-//            if (!pv) {
-//                return nullptr;
-//            }
-//            const JSIProxyObjectValue *object = static_cast<const JSIProxyObjectValue *>(pv);
-//            assert(
-//                    object->ctx_ == ctx_ &&
-//                    "Don't try to clone an object backed by a different Runtime");
-//            return makeObjectValue(object->obj_);
+            if (!pv) {
+                return nullptr;
+            }
+            const JSIProxyObjectValue *object = static_cast<const JSIProxyObjectValue *>(pv);
+            return makeObjectValue(object->obj_);
 }
 
 jsi::Runtime::PointerValue *JSIProxyRuntime::clonePropNameID(
         const jsi::Runtime::PointerValue *pv) {
-//            if (!pv) {
-//                return nullptr;
-//            }
-//            const JSIProxyStringValue *string = static_cast<const JSIProxyStringValue *>(pv);
-//            return makeStringValue(string->str_);
+            if (!pv) {
+                return nullptr;
+            }
+            const JSIProxyStringValue *string = static_cast<const JSIProxyStringValue *>(pv);
+            return makeStringValue(string->str_);
 }
 
 jsi::PropNameID JSIProxyRuntime::createPropNameIDFromAscii(
@@ -561,19 +607,26 @@ jsi::String JSIProxyRuntime::createStringFromAscii(const char *str, size_t lengt
 jsi::String JSIProxyRuntime::createStringFromUtf8(
         const uint8_t *str,
         size_t length) {
-    /*std::string tmp(reinterpret_cast<const char *>(str), length);
-    JSStringRef stringRef = JSStringCreateWithUTF8CString(tmp.c_str());
-    auto result = createString(stringRef);
-    JSStringRelease(stringRef);
-    return result;*/
+    ::ndk::SpAIBinder resultBinder;
+    const std::vector<int8_t> bytes(str, str+length);
+    jsiService_->createFromUtf8(bytes, length, &resultBinder);
+    auto jsiStringService = aidl::com::example::remotejsi::JSIStringService::fromBinder(resultBinder);
+    return createStringValue(jsiStringService);
 }
 
 std::string JSIProxyRuntime::utf8(const jsi::String &str) {
-//            return JSStringToSTLString(stringRef(str));
+    const JSIProxyStringValue* pv = reinterpret_cast<const JSIProxyStringValue*>(getPointerValue(str));
+    auto stringBinder = pv->str_;
+    std::string result;
+    stringBinder->utf8(&result);
+    return result;
 }
 
 jsi::Object JSIProxyRuntime::createObject() {
-//            return createObject(static_cast<JSObjectRef>(nullptr));
+    ::ndk::SpAIBinder resultBinder;
+    jsiService_->createObject(&resultBinder);
+    auto jsiObjectService = aidl::com::example::remotejsi::JSIObjectService::fromBinder(resultBinder);
+    return createObjectValue(jsiObjectService);
 }
 
 //// HostObject details

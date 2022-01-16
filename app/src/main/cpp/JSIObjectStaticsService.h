@@ -1,0 +1,14 @@
+//
+// Created by anandrag on 1/15/2022.
+//
+
+#ifndef REMOTEJSI_JSIOBJECTSTATICSSERVICE_H
+#define REMOTEJSI_JSIOBJECTSTATICSSERVICE_H
+
+
+class JSIObjectStaticsService {
+
+};
+
+
+#endif //REMOTEJSI_JSIOBJECTSTATICSSERVICE_H

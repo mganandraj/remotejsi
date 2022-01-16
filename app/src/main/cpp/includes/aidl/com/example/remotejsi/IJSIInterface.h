@@ -29,12 +29,18 @@ public:
   static bool setDefaultImpl(std::shared_ptr<IJSIInterface> impl);
   static const std::shared_ptr<IJSIInterface>& getDefaultImpl();
   virtual ::ndk::ScopedAStatus eval(const ::ndk::SpAIBinder& in_bufferBinder, const std::string& in_sourceURL, ::ndk::SpAIBinder* _aidl_return) = 0;
+  virtual ::ndk::ScopedAStatus createObject(::ndk::SpAIBinder* _aidl_return) = 0;
+  virtual ::ndk::ScopedAStatus createFromAscii(const std::vector<int8_t>& in_chars, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) = 0;
+  virtual ::ndk::ScopedAStatus createFromUtf8(const std::vector<int8_t>& in_bytes, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) = 0;
 private:
   static std::shared_ptr<IJSIInterface> default_impl;
 };
 class IJSIInterfaceDefault : public IJSIInterface {
 public:
   ::ndk::ScopedAStatus eval(const ::ndk::SpAIBinder& in_bufferBinder, const std::string& in_sourceURL, ::ndk::SpAIBinder* _aidl_return) override;
+  ::ndk::ScopedAStatus createObject(::ndk::SpAIBinder* _aidl_return) override;
+  ::ndk::ScopedAStatus createFromAscii(const std::vector<int8_t>& in_chars, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) override;
+  ::ndk::ScopedAStatus createFromUtf8(const std::vector<int8_t>& in_bytes, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) override;
   ::ndk::SpAIBinder asBinder() override;
   bool isRemote() override;
 };

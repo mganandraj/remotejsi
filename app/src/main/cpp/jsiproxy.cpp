@@ -73,7 +73,28 @@ Java_com_example_remotejsi_JSIProxy_talkToService(
         std::unique_ptr<facebook::jsi::Runtime> jsiRuntime = com::example::remotejsi::makeJSIProxyRuntime(g_spManagerService);
         auto script = std::make_shared<StringBuffer>("\"abcde\"");
         std::string sourceUrl = "MyScript";
-        jsiRuntime->evaluateJavaScript(script, sourceUrl);
+        facebook::jsi::Value result = jsiRuntime->evaluateJavaScript(script, sourceUrl);
+        if(result.isString()) {
+            facebook::jsi::String str = result.getString(*jsiRuntime);
+            LOGD("Received String result: %s", str.utf8(*jsiRuntime).c_str());
+        } else if(result.isObject()) {
+            facebook::jsi::Object obj = result.getObject(*jsiRuntime);
+            LOGD("Received String result: %d props", obj.getPropertyNames(*jsiRuntime).size(*jsiRuntime));
+        } else if(result.isSymbol()) {
+            facebook::jsi::Symbol sym = result.getSymbol(*jsiRuntime);
+            LOGD("Received Symbol result");
+        } else if(result.isNumber()) {
+            LOGD("Received Number result: %d", result.getNumber());
+        } else if(result.isBool()) {
+            bool resbool = result.getBool();
+            LOGD("Received Bool result: %d", resbool ? "<true>" : "<false>");
+        } else if(result.isNull()) {
+            LOGD("Received Bool result: <null>");
+        } else if(result.isUndefined()) {
+            LOGD("Received Bool result: <undefined>");
+        } else {
+            LOGE("Unknown result !!");
+        }
     }
 
     std::string sRet("Succeess");
