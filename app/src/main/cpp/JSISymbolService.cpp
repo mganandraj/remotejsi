@@ -16,4 +16,10 @@ namespace aidl::com::example::remotejsi {
     JSISymbolService::JSISymbolService(std::shared_ptr <facebook::jsi::Runtime> runtime,
                                        facebook::jsi::Symbol jsValue)
             : runtime_(runtime), jsSymbol_(std::move(jsValue)) {}
+
+    facebook::jsi::Symbol JSISymbolService::copySymbol() {
+        return facebook::jsi::Value(*runtime_, jsSymbol_).getSymbol(*runtime_);
+    }
+
 }
+

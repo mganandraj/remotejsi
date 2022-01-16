@@ -11,6 +11,9 @@ interface IJSIInterface {
 
     IBinder createObject();
 
+    // This is wierd .. Need to find a more elegant solution ..
+    IBinder cloneValue(byte valueType, boolean boolValue, double doubleValue, IBinder pointerBinder);
+
     IBinder createFromAscii(in byte[] chars, long length);
     IBinder createFromUtf8(in byte[] bytes, long length);
 }

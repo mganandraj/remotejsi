@@ -85,4 +85,9 @@ JSIValueService::JSIValueService(std::shared_ptr<facebook::jsi::Runtime> runtime
     *_aidl_return = jsiSymbolService->asBinder();
     return ::ndk::ScopedAStatus::ok();
 }
+
+facebook::jsi::Value JSIValueService::copyValue() {
+    return facebook::jsi::Value(*runtime_, jsValue_);
+}
+
 }

@@ -75,6 +75,58 @@ JSIService::JSIService(std::shared_ptr<IRemoteJSIInterface> remoteJsiInterface) 
     return ::ndk::ScopedAStatus::ok();
 }
 
+::ndk::ScopedAStatus JSIService::cloneValue(int8_t in_valueType, bool in_boolValue, double in_doubleValue, const ::ndk::SpAIBinder& in_pointerBinder, ::ndk::SpAIBinder* _aidl_return) {
+    facebook::jsi::Value resultJSValue;
+    switch (in_valueType) {
+        case 0:
+            resultJSValue = facebook::jsi::Value::undefined();
+            LOGE("[App] [cpp] Successfully retrieved result from binder: <undefined>");
+            break;
+        case 1:
+            resultJSValue = facebook::jsi::Value::null();
+            LOGE("[App] [cpp] Successfully retrieved result from binder: <null>");
+            break;
+        case 2:
+            resultJSValue = facebook::jsi::Value(in_boolValue);
+            LOGE("[App] [cpp] Successfully retrieved result from binder: %s",
+                 in_boolValue ? "true" : "false");
+            break;
+        case 3:
+            resultJSValue = facebook::jsi::Value(in_doubleValue);
+            LOGE("[App] [cpp] Successfully retrieved result from binder: %d", in_doubleValue);
+            break;
+        case 4: {
+            auto jsiSymbolService = aidl::com::example::remotejsi::JSISymbolService::fromBinder(
+                    in_pointerBinder);
+            JSISymbolService *symbolService = static_cast<JSISymbolService *>(jsiSymbolService.get());
+            resultJSValue = facebook::jsi::Value(symbolService->copySymbol());
+            LOGE("[App] [cpp] Successfully retrieved symbol from binder");
+        }
+            break;
+        case 5: {
+            auto jsiStringService = aidl::com::example::remotejsi::JSIStringService::fromBinder(
+                    in_pointerBinder);
+            JSIStringService *stringService = static_cast<JSIStringService *>(jsiStringService.get());
+            resultJSValue = facebook::jsi::Value(stringService->copyString());
+            LOGE("[App] [cpp] Successfully retrieved string from binder");
+        }
+            break;
+        case 6: {
+            auto jsiObjectService = aidl::com::example::remotejsi::JSIObjectService::fromBinder(
+                    in_pointerBinder);
+            JSIObjectService *objectService = static_cast<JSIObjectService *>(jsiObjectService.get());
+            resultJSValue = facebook::jsi::Value(objectService->copyObject());
+            LOGE("[App] [cpp] Successfully retrieved object from binder");
+        }
+        default:
+            std::abort();
+            break;
+    }
+
+    *_aidl_return = ::ndk::SharedRefBase::make<JSIValueService>(runtime_, std::move(resultJSValue))->asBinder();
+    return ::ndk::ScopedAStatus::ok();
+}
+
 ::ndk::ScopedAStatus JSIService::createObject(::ndk::SpAIBinder* _aidl_return) {
     facebook::jsi::Object obj(*runtime_);
     *_aidl_return = ::ndk::SharedRefBase::make<aidl::com::example::remotejsi::JSIObjectService>(runtime_, std::move(obj))->asBinder();

@@ -49,7 +49,37 @@ static binder_status_t _aidl_onTransact(AIBinder* _aidl_binder, transaction_code
 
       break;
     }
-    case (FIRST_CALL_TRANSACTION + 2 /*createFromAscii*/): {
+    case (FIRST_CALL_TRANSACTION + 2 /*cloneValue*/): {
+      int8_t in_valueType;
+      bool in_boolValue;
+      double in_doubleValue;
+      ::ndk::SpAIBinder in_pointerBinder;
+      ::ndk::SpAIBinder _aidl_return;
+
+      _aidl_ret_status = AParcel_readByte(_aidl_in, &in_valueType);
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      _aidl_ret_status = AParcel_readBool(_aidl_in, &in_boolValue);
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      _aidl_ret_status = AParcel_readDouble(_aidl_in, &in_doubleValue);
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      _aidl_ret_status = ::ndk::AParcel_readRequiredStrongBinder(_aidl_in, &in_pointerBinder);
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->cloneValue(in_valueType, in_boolValue, in_doubleValue, in_pointerBinder, &_aidl_return);
+      _aidl_ret_status = AParcel_writeStatusHeader(_aidl_out, _aidl_status.get());
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      if (!AStatus_isOk(_aidl_status.get())) break;
+
+      _aidl_ret_status = ::ndk::AParcel_writeRequiredStrongBinder(_aidl_out, _aidl_return);
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      break;
+    }
+    case (FIRST_CALL_TRANSACTION + 3 /*createFromAscii*/): {
       std::vector<int8_t> in_chars;
       int64_t in_length;
       ::ndk::SpAIBinder _aidl_return;
@@ -71,7 +101,7 @@ static binder_status_t _aidl_onTransact(AIBinder* _aidl_binder, transaction_code
 
       break;
     }
-    case (FIRST_CALL_TRANSACTION + 3 /*createFromUtf8*/): {
+    case (FIRST_CALL_TRANSACTION + 4 /*createFromUtf8*/): {
       std::vector<int8_t> in_bytes;
       int64_t in_length;
       ::ndk::SpAIBinder _aidl_return;
@@ -180,6 +210,54 @@ BpJSIInterface::~BpJSIInterface() {}
   _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
   return _aidl_status;
 }
+::ndk::ScopedAStatus BpJSIInterface::cloneValue(int8_t in_valueType, bool in_boolValue, double in_doubleValue, const ::ndk::SpAIBinder& in_pointerBinder, ::ndk::SpAIBinder* _aidl_return) {
+  binder_status_t _aidl_ret_status = STATUS_OK;
+  ::ndk::ScopedAStatus _aidl_status;
+  ::ndk::ScopedAParcel _aidl_in;
+  ::ndk::ScopedAParcel _aidl_out;
+
+  _aidl_ret_status = AIBinder_prepareTransaction(asBinder().get(), _aidl_in.getR());
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = AParcel_writeByte(_aidl_in.get(), in_valueType);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = AParcel_writeBool(_aidl_in.get(), in_boolValue);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = AParcel_writeDouble(_aidl_in.get(), in_doubleValue);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = ::ndk::AParcel_writeRequiredStrongBinder(_aidl_in.get(), in_pointerBinder);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = AIBinder_transact(
+    asBinder().get(),
+    (FIRST_CALL_TRANSACTION + 2 /*cloneValue*/),
+    _aidl_in.getR(),
+    _aidl_out.getR(),
+    0
+    #ifdef BINDER_STABILITY_SUPPORT
+    | FLAG_PRIVATE_LOCAL
+    #endif  // BINDER_STABILITY_SUPPORT
+    );
+  if (_aidl_ret_status == STATUS_UNKNOWN_TRANSACTION && IJSIInterface::getDefaultImpl()) {
+    return IJSIInterface::getDefaultImpl()->cloneValue(in_valueType, in_boolValue, in_doubleValue, in_pointerBinder, _aidl_return);
+  }
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = AParcel_readStatusHeader(_aidl_out.get(), _aidl_status.getR());
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  if (!AStatus_isOk(_aidl_status.get())) return _aidl_status;
+
+  _aidl_ret_status = ::ndk::AParcel_readRequiredStrongBinder(_aidl_out.get(), _aidl_return);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_error:
+  _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
+  return _aidl_status;
+}
 ::ndk::ScopedAStatus BpJSIInterface::createFromAscii(const std::vector<int8_t>& in_chars, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) {
   binder_status_t _aidl_ret_status = STATUS_OK;
   ::ndk::ScopedAStatus _aidl_status;
@@ -197,7 +275,7 @@ BpJSIInterface::~BpJSIInterface() {}
 
   _aidl_ret_status = AIBinder_transact(
     asBinder().get(),
-    (FIRST_CALL_TRANSACTION + 2 /*createFromAscii*/),
+    (FIRST_CALL_TRANSACTION + 3 /*createFromAscii*/),
     _aidl_in.getR(),
     _aidl_out.getR(),
     0
@@ -239,7 +317,7 @@ BpJSIInterface::~BpJSIInterface() {}
 
   _aidl_ret_status = AIBinder_transact(
     asBinder().get(),
-    (FIRST_CALL_TRANSACTION + 3 /*createFromUtf8*/),
+    (FIRST_CALL_TRANSACTION + 4 /*createFromUtf8*/),
     _aidl_in.getR(),
     _aidl_out.getR(),
     0
@@ -320,6 +398,11 @@ std::shared_ptr<IJSIInterface> IJSIInterface::default_impl = nullptr;
   return _aidl_status;
 }
 ::ndk::ScopedAStatus IJSIInterfaceDefault::createObject(::ndk::SpAIBinder* /*_aidl_return*/) {
+  ::ndk::ScopedAStatus _aidl_status;
+  _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
+  return _aidl_status;
+}
+::ndk::ScopedAStatus IJSIInterfaceDefault::cloneValue(int8_t /*in_valueType*/, bool /*in_boolValue*/, double /*in_doubleValue*/, const ::ndk::SpAIBinder& /*in_pointerBinder*/, ::ndk::SpAIBinder* /*_aidl_return*/) {
   ::ndk::ScopedAStatus _aidl_status;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
   return _aidl_status;

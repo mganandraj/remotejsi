@@ -22,6 +22,8 @@ public:
     ::ndk::ScopedAStatus getObject(::ndk::SpAIBinder* _aidl_return) override;
     ::ndk::ScopedAStatus getSymbol(::ndk::SpAIBinder* _aidl_return) override;
 
+    facebook::jsi::Value copyValue();
+
 private:
     std::shared_ptr<facebook::jsi::Runtime> runtime_;
     facebook::jsi::Value jsValue_;

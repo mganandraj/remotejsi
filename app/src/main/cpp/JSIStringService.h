@@ -15,6 +15,8 @@ namespace aidl::com::example::remotejsi {
     public:
         JSIStringService(std::shared_ptr<facebook::jsi::Runtime> runtime, facebook::jsi::String jsString);
         ::ndk::ScopedAStatus utf8(std::string* _aidl_return) override;
+    public:
+        facebook::jsi::String copyString();
     private:
         std::shared_ptr<facebook::jsi::Runtime> runtime_;
         facebook::jsi::String jsString_;

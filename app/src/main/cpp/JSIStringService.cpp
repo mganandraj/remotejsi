@@ -11,6 +11,7 @@
 
 #define LOG_TAG "JSIStringService"
 #include "logging.h"
+#include <jsi/jsi.h>
 
 namespace aidl::com::example::remotejsi {
 JSIStringService::JSIStringService(std::shared_ptr <facebook::jsi::Runtime> runtime,
@@ -22,4 +23,7 @@ JSIStringService::JSIStringService(std::shared_ptr <facebook::jsi::Runtime> runt
     return ::ndk::ScopedAStatus::ok();
 }
 
+facebook::jsi::String JSIStringService::copyString() {
+    return facebook::jsi::Value(*runtime_, jsString_).getString(*runtime_);
+}
 }

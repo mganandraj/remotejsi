@@ -14,7 +14,8 @@ namespace aidl::com::example::remotejsi {
     class JSISymbolService : public BnJSISymbolInterface {
     public:
         JSISymbolService(std::shared_ptr<facebook::jsi::Runtime> runtime, facebook::jsi::Symbol jsSymbol);
-
+    public:
+        facebook::jsi::Symbol copySymbol();
     private:
         std::shared_ptr<facebook::jsi::Runtime> runtime_;
         facebook::jsi::Symbol jsSymbol_;
