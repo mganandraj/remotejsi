@@ -104,6 +104,14 @@ Java_com_example_remotejsi_JSIProxy_talkToService(
         object.setProperty(*jsiRuntime, "name", "anand");
         facebook::jsi::Value resSet = object.getProperty(*jsiRuntime, "name");
         checkValue(*jsiRuntime, resSet);
+
+        auto hostFunction = [](facebook::jsi::Runtime& rt, const facebook::jsi::Value& thisVal, const facebook::jsi::Value* args, size_t count) -> facebook::jsi::Value {
+            LOGD("Host Function callback");
+        };
+
+        facebook::jsi::Object hostFunc= facebook::jsi::Function::createFromHostFunction(*jsiRuntime, facebook::jsi::PropNameID::forAscii(*jsiRuntime, "hostfunc"), 0, std::move(hostFunction));
+        facebook::jsi::Object global = jsiRuntime->global();
+        global.setProperty(*jsiRuntime, facebook::jsi::PropNameID::forAscii(*jsiRuntime, "hostfunc"), hostFunc);
     }
 
     std::string sRet("Succeess");
