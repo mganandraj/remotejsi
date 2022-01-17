@@ -123,6 +123,20 @@ static binder_status_t _aidl_onTransact(AIBinder* _aidl_binder, transaction_code
 
       break;
     }
+    case (FIRST_CALL_TRANSACTION + 5 /*createValueCollection*/): {
+      ::ndk::SpAIBinder _aidl_return;
+
+      ::ndk::ScopedAStatus _aidl_status = _aidl_impl->createValueCollection(&_aidl_return);
+      _aidl_ret_status = AParcel_writeStatusHeader(_aidl_out, _aidl_status.get());
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      if (!AStatus_isOk(_aidl_status.get())) break;
+
+      _aidl_ret_status = ::ndk::AParcel_writeRequiredStrongBinder(_aidl_out, _aidl_return);
+      if (_aidl_ret_status != STATUS_OK) break;
+
+      break;
+    }
   }
   return _aidl_ret_status;
 }
@@ -342,6 +356,42 @@ BpJSIInterface::~BpJSIInterface() {}
   _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
   return _aidl_status;
 }
+::ndk::ScopedAStatus BpJSIInterface::createValueCollection(::ndk::SpAIBinder* _aidl_return) {
+  binder_status_t _aidl_ret_status = STATUS_OK;
+  ::ndk::ScopedAStatus _aidl_status;
+  ::ndk::ScopedAParcel _aidl_in;
+  ::ndk::ScopedAParcel _aidl_out;
+
+  _aidl_ret_status = AIBinder_prepareTransaction(asBinder().get(), _aidl_in.getR());
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = AIBinder_transact(
+    asBinder().get(),
+    (FIRST_CALL_TRANSACTION + 5 /*createValueCollection*/),
+    _aidl_in.getR(),
+    _aidl_out.getR(),
+    0
+    #ifdef BINDER_STABILITY_SUPPORT
+    | FLAG_PRIVATE_LOCAL
+    #endif  // BINDER_STABILITY_SUPPORT
+    );
+  if (_aidl_ret_status == STATUS_UNKNOWN_TRANSACTION && IJSIInterface::getDefaultImpl()) {
+    return IJSIInterface::getDefaultImpl()->createValueCollection(_aidl_return);
+  }
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_ret_status = AParcel_readStatusHeader(_aidl_out.get(), _aidl_status.getR());
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  if (!AStatus_isOk(_aidl_status.get())) return _aidl_status;
+
+  _aidl_ret_status = ::ndk::AParcel_readRequiredStrongBinder(_aidl_out.get(), _aidl_return);
+  if (_aidl_ret_status != STATUS_OK) goto _aidl_error;
+
+  _aidl_error:
+  _aidl_status.set(AStatus_fromStatus(_aidl_ret_status));
+  return _aidl_status;
+}
 // Source for BnJSIInterface
 BnJSIInterface::BnJSIInterface() {}
 BnJSIInterface::~BnJSIInterface() {}
@@ -413,6 +463,11 @@ std::shared_ptr<IJSIInterface> IJSIInterface::default_impl = nullptr;
   return _aidl_status;
 }
 ::ndk::ScopedAStatus IJSIInterfaceDefault::createFromUtf8(const std::vector<int8_t>& /*in_bytes*/, int64_t /*in_length*/, ::ndk::SpAIBinder* /*_aidl_return*/) {
+  ::ndk::ScopedAStatus _aidl_status;
+  _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
+  return _aidl_status;
+}
+::ndk::ScopedAStatus IJSIInterfaceDefault::createValueCollection(::ndk::SpAIBinder* /*_aidl_return*/) {
   ::ndk::ScopedAStatus _aidl_status;
   _aidl_status.set(AStatus_fromStatus(STATUS_UNKNOWN_TRANSACTION));
   return _aidl_status;

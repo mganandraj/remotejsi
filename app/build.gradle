@@ -95,7 +95,8 @@ task compileAidlNdk() {
         def aidlFiles = ['IJSIInterface.aidl', 'IRemoteJSIInterface.aidl',
                          'IManagerInterface.aidl', 'IJSIBufferInterface.aidl',
                          'IJSIValueInterface.aidl', 'IJSIStringInterface.aidl', 'IJSIObjectInterface.aidl',
-                         'IJSISymbolInterface.aidl', 'IJSIStringStaticsInterface.aidl', 'IJSIObjectStaticsInterface.aidl']
+                         'IJSISymbolInterface.aidl', 'IJSIStringStaticsInterface.aidl', 'IJSIObjectStaticsInterface.aidl',
+                         'IValueCollectionInterface.aidl', 'IHostFunctionInterface.aidl', 'IHostObjectInterface.aidl']
 
         for (file in aidlFiles) {
             exec {

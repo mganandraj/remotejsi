@@ -34,6 +34,9 @@ add_library(bindercommon
         ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IJSIStringInterface.cpp
         ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IJSIObjectInterface.cpp
         ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IJSISymbolInterface.cpp
+        ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IValueCollectionInterface.cpp
+        ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IHostFunctionInterface.cpp
+        ${project_dir}/src/main/cpp/aidl/com/example/remotejsi/IHostObjectInterface.cpp
         )
 
 target_include_directories (bindercommon
@@ -49,7 +52,8 @@ target_link_libraries( # Specifies the target library.
 
 add_library(jsiimpl
         SHARED
-        jsiimpl.cpp JSIService.cpp JSIValueService.cpp JSIStringService.cpp JSIObjectService.cpp JSISymbolService.cpp ManagerService.cpp
+        jsiimpl.cpp JSIService.cpp JSIValueService.cpp JSIStringService.cpp JSIObjectService.cpp
+        JSISymbolService.cpp ManagerService.cpp HostFunctionService.cpp HostObjectService.cpp JSIValueCollectionService.cpp
 )
 
 target_include_directories (jsiimpl

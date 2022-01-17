@@ -147,4 +147,8 @@ JSIService::JSIService(std::shared_ptr<IRemoteJSIInterface> remoteJsiInterface) 
     return ::ndk::ScopedAStatus::ok();
 }
 
+::ndk::ScopedAStatus JSIService::createValueCollection(::ndk::SpAIBinder* _aidl_return) {
+    return ::ndk::ScopedAStatus::ok();
+}
+
 }

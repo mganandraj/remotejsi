@@ -33,6 +33,7 @@ public:
   virtual ::ndk::ScopedAStatus cloneValue(int8_t in_valueType, bool in_boolValue, double in_doubleValue, const ::ndk::SpAIBinder& in_pointerBinder, ::ndk::SpAIBinder* _aidl_return) = 0;
   virtual ::ndk::ScopedAStatus createFromAscii(const std::vector<int8_t>& in_chars, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) = 0;
   virtual ::ndk::ScopedAStatus createFromUtf8(const std::vector<int8_t>& in_bytes, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) = 0;
+  virtual ::ndk::ScopedAStatus createValueCollection(::ndk::SpAIBinder* _aidl_return) = 0;
 private:
   static std::shared_ptr<IJSIInterface> default_impl;
 };
@@ -43,6 +44,7 @@ public:
   ::ndk::ScopedAStatus cloneValue(int8_t in_valueType, bool in_boolValue, double in_doubleValue, const ::ndk::SpAIBinder& in_pointerBinder, ::ndk::SpAIBinder* _aidl_return) override;
   ::ndk::ScopedAStatus createFromAscii(const std::vector<int8_t>& in_chars, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) override;
   ::ndk::ScopedAStatus createFromUtf8(const std::vector<int8_t>& in_bytes, int64_t in_length, ::ndk::SpAIBinder* _aidl_return) override;
+  ::ndk::ScopedAStatus createValueCollection(::ndk::SpAIBinder* _aidl_return) override;
   ::ndk::SpAIBinder asBinder() override;
   bool isRemote() override;
 };

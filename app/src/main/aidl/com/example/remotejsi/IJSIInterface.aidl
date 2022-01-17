@@ -16,4 +16,6 @@ interface IJSIInterface {
 
     IBinder createFromAscii(in byte[] chars, long length);
     IBinder createFromUtf8(in byte[] bytes, long length);
+
+    IBinder createValueCollection();
 }
