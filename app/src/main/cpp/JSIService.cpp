@@ -151,4 +151,17 @@ JSIService::JSIService(std::shared_ptr<IRemoteJSIInterface> remoteJsiInterface) 
     return ::ndk::ScopedAStatus::ok();
 }
 
+::ndk::ScopedAStatus JSIService::createFunctionFromHostFunction(const ::ndk::SpAIBinder& in_hostFunct, const ::ndk::SpAIBinder& in_propId, int64_t in_paramCount, ::ndk::SpAIBinder* _aidl_return) {
+
+}
+
+::ndk::ScopedAStatus JSIService::call(const ::ndk::SpAIBinder& in_func, const ::ndk::SpAIBinder& in_thisObj, const ::ndk::SpAIBinder& in_args, int64_t in_argsCount, ::ndk::SpAIBinder* _aidl_return) {
+
+}
+
+::ndk::ScopedAStatus JSIService::callAsConstructor(const ::ndk::SpAIBinder& in_func, const ::ndk::SpAIBinder& in_args, int64_t in_argsCount, ::ndk::SpAIBinder* _aidl_return) {
+
+}
+
+
 }

@@ -1035,6 +1035,7 @@ jsi::Function JSIProxyRuntime::createFunctionFromHostFunction(
         const jsi::PropNameID &name,
         unsigned int paramCount,
         jsi::HostFunctionType func) {
+
 //            class HostFunctionMetadata : public HostFunctionProxy {
 //            public:
 //                static void initialize(JSIProxyontextRef ctx, JSObjectRef object) {

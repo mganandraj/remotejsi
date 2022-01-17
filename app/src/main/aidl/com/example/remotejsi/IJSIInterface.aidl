@@ -18,4 +18,8 @@ interface IJSIInterface {
     IBinder createFromUtf8(in byte[] bytes, long length);
 
     IBinder createValueCollection();
+    IBinder createFunctionFromHostFunction(IBinder hostFunct, IBinder propId, long paramCount);
+
+    IBinder call(IBinder func, IBinder thisObj, IBinder args, long argsCount);
+    IBinder callAsConstructor(IBinder func, IBinder args, long argsCount);
 }
